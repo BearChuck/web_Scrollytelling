@@ -375,9 +375,9 @@
               </span>
               <span class="text-xs eo-font-mono text-cyan-400 font-bold">1 / 4</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
               壓軸大合照與爆滿氣勢
-            </h2>
+            </div>
             <p class="mt-2.5 text-[15px] sm:text-sm lg:text-[15px] text-slate-200 leading-relaxed">
               千人論壇最後的大合照，台下第一排離舞台邊緣往往不到 2 公尺。退無可退時，16mm 的 107° 超廣視角能一口氣吞下整面 12 公尺寬的主視覺 LED 牆與全場觀眾；就算是 50 人的小型講座，蹲在走道低角度仰拍，也能靠廣角拉伸感交出「全場爆滿」的公關照。
             </p>
@@ -395,9 +395,9 @@
               </span>
               <span class="text-xs eo-font-mono text-emerald-400 font-bold">2 / 4</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
               茶敘敬酒與展攤互動跟拍
-            </h2>
+            </div>
             <p class="mt-2.5 text-[15px] sm:text-sm lg:text-[15px] text-slate-200 leading-relaxed">
               中場休息的 VIP 交流區與簽到背板前，通道擠滿端著香檳的來賓，根本退不到兩公尺外。掛上 35mm 站在 1.2 公尺社交距離抓拍，既能清楚拍下貴賓交換名片、碰杯大笑的表情，又能把背後的贊助商 Logo 與展攤陳設完整帶入，交代現場故事脈絡。
             </p>
@@ -415,9 +415,9 @@
               </span>
               <span class="text-xs eo-font-mono text-purple-400 font-bold">3 / 4</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
               講者眼神特寫與雜物剝離
-            </h2>
+            </div>
             <p class="mt-2.5 text-[15px] sm:text-sm lg:text-[15px] text-slate-200 leading-relaxed">
               活動會場到處是破壞畫面的礦泉水瓶、麥克風線、逃生指示燈與發呆的工作人員。退到 3 公尺外換上 85mm f/1.4，28.5° 窄視角加上淺景深，能瞬間把講者身後的雜亂背景融化為柔和光斑，精準鎖定主講人比手勢的瞬間與台下 VIP 專注點頭的側臉。
             </p>
@@ -435,9 +435,9 @@
               </span>
               <span class="text-xs eo-font-mono text-amber-400 font-bold">4 / 4</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <div class="text-xl sm:text-2xl font-black text-white tracking-tight">
               遠距零干擾狙擊與滿版背板壓縮
-            </h2>
+            </div>
             <p class="mt-2.5 text-[15px] sm:text-sm lg:text-[15px] text-slate-200 leading-relaxed">
               頒獎典禮或啟動儀式時，你不能衝上台擋住台下長官與轉播攝影機的視線。站在 10 公尺外的中場走道端起 200mm，僅 12° 視角能越過前排黑壓壓的後腦勺，把原本離講者 4 公尺遠的舞台 LED 主視覺硬生生拉近貼滿整個背景，連得獎者眼眶泛淚的瞬間都無所遁形。
             </p>
