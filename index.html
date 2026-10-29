@@ -109,6 +109,21 @@
       box-shadow: 0 0 35px -5px rgba(34, 211, 238, 0.22), inset 0 0 20px rgba(34, 211, 238, 0.06);
     }
 
+    /* RWD 響應式階段卡片切換：手機/平板 (<1024px) 僅顯示當前 Active 卡片，桌機 (>=1024px) 四張全顯交錯 */
+    @media (max-width: 1023px) {
+      .phase-card:not(.is-active) {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(12px) scale(0.96) !important;
+      }
+      .phase-card.is-active {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: translateY(0) scale(1) !important;
+        z-index: 30;
+      }
+    }
+
     /* HUD 按鈕高亮狀態 */
     .hud-btn {
       transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -156,20 +171,20 @@
       <div id="top-progress-bar" class="w-full h-full origin-left scale-x-0 bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-500 shadow-[0_0_12px_#22d3ee]"></div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between text-xs font-mono">
-      <div class="flex items-center gap-3">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-12 sm:h-14 flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-2 sm:gap-3">
         <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
-        <span class="tracking-widest text-slate-200 font-bold">EVENT_OPTICS // FOCAL_TIMELINE</span>
+        <span class="tracking-widest text-slate-200 font-bold text-[11px] sm:text-xs">EVENT_OPTICS // FOCAL_TIMELINE</span>
         <span class="hidden md:inline-block text-slate-500">|</span>
         <span class="hidden md:inline-block text-slate-400">FULL-FRAME 35MM EVENT COVERAGE</span>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2.5 sm:gap-4">
         <div class="hidden sm:flex items-center gap-2 text-slate-400">
           <span>ACTIVE FOCAL:</span>
           <span id="header-focal-readout" class="text-cyan-400 font-bold text-sm">16mm</span>
         </div>
-        <div class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 font-semibold">
+        <div class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 font-semibold text-[11px] sm:text-xs">
           SCROLL <span id="top-progress-text">000%</span>
         </div>
       </div>
@@ -177,102 +192,99 @@
   </header>
 
   <!-- ==================== 1. HERO 引言區塊 ==================== -->
-  <section id="hero-section" class="relative min-h-screen flex flex-col justify-center items-center px-6 pt-20 pb-16 overflow-hidden bg-tech-grid">
+  <section id="hero-section" class="relative min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 pt-20 pb-16 overflow-hidden bg-tech-grid">
     <!-- 背景光暈裝飾 -->
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[520px] h-[320px] sm:h-[520px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[280px] sm:w-[400px] h-[280px] sm:h-[400px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-    <div class="relative z-10 max-w-4xl mx-auto text-center space-y-6">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono tracking-widest uppercase shadow-[0_0_20px_rgba(34,211,238,0.12)]">
+    <div class="relative z-10 max-w-4xl mx-auto text-center space-y-5 sm:space-y-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-[11px] sm:text-xs font-mono tracking-widest uppercase shadow-[0_0_20px_rgba(34,211,238,0.12)]">
         <span>Event Photography Optical Scrollytelling</span>
         <span class="text-slate-600">•</span>
         <span>16mm — 200mm</span>
       </div>
 
-      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] text-white">
+      <h1 class="text-3xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.15] text-white">
         活動現場不能重來，焦段決定你的<br />
         <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-purple-400 drop-shadow-[0_0_25px_rgba(34,211,238,0.25)]">
           跑位距離與現場張力
         </span>
       </h1>
 
-      <p class="max-w-2xl mx-auto text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+      <p class="max-w-2xl mx-auto text-slate-300 text-sm sm:text-lg leading-relaxed font-normal">
         燈暗、主講人上台。同樣拍一張舉杯半身照，掛 16mm 你得蹲進第一排貴賓腳邊 50 公分，把整座千人展廳與頭頂桁架全收進畫面；換 200mm 你可以退到 10 公尺外的音控台旁不打擾任何人，把舞台背板的主視覺 Logo 壓縮得像貼在講者肩膀後一樣滿版。
       </p>
 
       <!-- 快速光學指標預覽 -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 max-w-3xl mx-auto text-left font-mono">
-        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
-          <div class="text-[11px] text-cyan-400">PHASE 01 // 16mm</div>
-          <div class="text-lg font-bold text-white mt-0.5">107° 全場大景</div>
-          <div class="text-xs text-slate-400 mt-1">爆滿人潮・舞台氣勢</div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-2 sm:pt-4 max-w-3xl mx-auto text-left font-mono">
+        <div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[10px] sm:text-[11px] text-cyan-400">PHASE 01 // 16mm</div>
+          <div class="text-base sm:text-lg font-bold text-white mt-0.5">107° 全場大景</div>
+          <div class="text-[11px] sm:text-xs text-slate-400 mt-1">爆滿人潮・舞台氣勢</div>
         </div>
-        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
-          <div class="text-[11px] text-emerald-400">PHASE 02 // 35mm</div>
-          <div class="text-lg font-bold text-white mt-0.5">63° 互動跟拍</div>
-          <div class="text-xs text-slate-400 mt-1">敬酒寒暄・人帶展攤</div>
+        <div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[10px] sm:text-[11px] text-emerald-400">PHASE 02 // 35mm</div>
+          <div class="text-base sm:text-lg font-bold text-white mt-0.5">63° 互動跟拍</div>
+          <div class="text-[11px] sm:text-xs text-slate-400 mt-1">敬酒寒暄・人帶展攤</div>
         </div>
-        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
-          <div class="text-[11px] text-purple-400">PHASE 03 // 85mm</div>
-          <div class="text-lg font-bold text-white mt-0.5">28.5° 講者神情</div>
-          <div class="text-xs text-slate-400 mt-1">過濾雜物・燈海散景</div>
+        <div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[10px] sm:text-[11px] text-purple-400">PHASE 03 // 85mm</div>
+          <div class="text-base sm:text-lg font-bold text-white mt-0.5">28.5° 講者神情</div>
+          <div class="text-[11px] sm:text-xs text-slate-400 mt-1">過濾雜物・燈海散景</div>
         </div>
-        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
-          <div class="text-[11px] text-amber-400">PHASE 04 // 200mm</div>
-          <div class="text-lg font-bold text-white mt-0.5">12° 遠距狙擊</div>
-          <div class="text-xs text-slate-400 mt-1">背板壓縮・零干擾抓拍</div>
+        <div class="p-3 sm:p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[10px] sm:text-[11px] text-amber-400">PHASE 04 // 200mm</div>
+          <div class="text-base sm:text-lg font-bold text-white mt-0.5">12° 遠距狙擊</div>
+          <div class="text-[11px] sm:text-xs text-slate-400 mt-1">背板壓縮・零干擾抓拍</div>
         </div>
       </div>
 
-      <div class="pt-6 flex flex-col items-center gap-3">
-        <button id="start-journey-btn" class="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-300 font-mono text-sm tracking-wider transition-all shadow-[0_0_25px_rgba(34,211,238,0.2)] hover:shadow-[0_0_35px_rgba(34,211,238,0.4)]">
+      <div class="pt-4 sm:pt-6 flex flex-col items-center gap-3">
+        <button id="start-journey-btn" class="group relative inline-flex items-center gap-3 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-300 font-mono text-xs sm:text-sm tracking-wider transition-all shadow-[0_0_25px_rgba(34,211,238,0.2)] hover:shadow-[0_0_35px_rgba(34,211,238,0.4)]">
           <span>啟動活動現場焦段模擬</span>
           <svg class="w-4 h-4 transition-transform group-hover:translate-y-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </button>
-        <span class="text-xs font-mono text-slate-500">向下滾動滑輪，或點擊曲線節點與下方 HUD 直接切換活動拍攝站位</span>
+        <span class="text-[11px] sm:text-xs font-mono text-slate-500">向下滾動滑輪，或點擊曲線節點與下方 HUD 直接切換活動拍攝站位</span>
       </div>
     </div>
   </section>
 
   <!-- ==================== 2. PINNED 核心展示視窗區塊 ==================== -->
-  <section id="pinned-stage" class="relative w-full h-screen overflow-hidden bg-slate-950 bg-tech-grid select-none">
+  <section id="pinned-stage" class="relative w-full h-[100dvh] overflow-hidden bg-slate-950 bg-tech-grid select-none">
     <div class="absolute inset-0 bg-radial-vignette pointer-events-none"></div>
 
     <!-- 動態光學氛圍背景光球 -->
-    <div id="ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none transition-colors duration-700"></div>
+    <div id="ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[560px] h-[320px] sm:h-[560px] rounded-full bg-cyan-500/15 blur-[130px] pointer-events-none transition-colors duration-700"></div>
 
-    <!-- 主容器：三欄式/絕對定位混合編排 -->
-    <div class="relative z-10 max-w-7xl mx-auto w-full h-full px-4 sm:px-6 pt-16 pb-20 flex flex-col justify-between">
+    <!-- 主容器：三欄式/絕對定位混合編排 (RWD 重構版：支援手機單卡疊層 + 桌機 12 欄對稱交錯) -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full h-full px-3 sm:px-6 pt-14 sm:pt-16 pb-20 sm:pb-24 flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden">
 
-      <!-- 上方狀態列：相機構圖觀景窗模擬 + 即時光學參數面板 -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+      <!-- [TOP] 上方狀態列：相機構圖觀景窗模擬 + 即時光學參數面板 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 items-center shrink-0">
         <!-- 左側：即時觀景窗模擬器 (Viewfinder Simulation) -->
-        <div class="lg:col-span-7 bg-slate-900/75 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 backdrop-blur-md shadow-lg">
-          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2.5">
-            <div class="flex items-center gap-2">
-              <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">STAGE VIEWFINDER</span>
-              <span id="vf-lens-label" class="text-slate-200 font-semibold">16mm f/2.8 GM // 舞台前緣大景</span>
+        <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 backdrop-blur-md shadow-lg">
+          <div class="flex items-center justify-between text-[10px] sm:text-xs font-mono text-slate-400 mb-1.5 sm:mb-2">
+            <div class="flex items-center gap-1.5 sm:gap-2 truncate">
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold shrink-0">STAGE VF</span>
+              <span id="vf-lens-label" class="text-slate-200 font-semibold truncate">16mm f/2.8 GM // 舞台前緣大景</span>
             </div>
-            <div class="flex items-center gap-3">
-              <span>FOV: <strong id="vf-fov" class="text-cyan-400">107°</strong></span>
-              <span>站位距離: <strong id="vf-dist" class="text-emerald-400">0.5m</strong></span>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+              <span>FOV <strong id="vf-fov" class="text-cyan-400">107°</strong></span>
+              <span>DIST <strong id="vf-dist" class="text-emerald-400">0.5m</strong></span>
             </div>
           </div>
 
           <!-- 觀景窗畫面：活動舞台桁架、LED 主視覺背板與聚光燈散景模擬 -->
-          <div class="relative w-full h-28 sm:h-36 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
+          <div class="relative w-full h-20 sm:h-28 lg:h-32 rounded-lg sm:rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
             <!-- 遠景舞台桁架與 LED 巨型螢幕群 (隨焦距放大拉近並模糊) -->
             <div id="vf-bg-layer" class="absolute inset-0 flex items-end justify-center opacity-75 transition-transform duration-100 origin-bottom" style="transform: scale(0.85);">
               <svg class="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
-                <!-- 展廳穹頂與舞台燈光光束 -->
                 <polygon points="0,160 0,95 65,60 130,105 210,40 290,90 370,30 460,85 540,50 600,90 600,160" fill="#0f172a" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.35" />
-                <!-- 舞台左右側翼與中央主視覺 LED 螢幕牆 -->
                 <rect x="85" y="65" width="38" height="95" fill="#1e293b" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.4" />
                 <rect x="235" y="45" width="130" height="115" fill="#1e293b" stroke="#a855f7" stroke-width="1" stroke-opacity="0.5" />
                 <rect x="475" y="65" width="38" height="95" fill="#1e293b" stroke="#34d399" stroke-width="0.8" stroke-opacity="0.4" />
-                <!-- 舞台電腦燈光斑與台下螢光棒散景 (Bokeh Circles) -->
                 <g id="vf-bokeh-group" opacity="0.15">
                   <circle cx="155" cy="65" r="14" fill="#22d3ee" />
                   <circle cx="300" cy="55" r="20" fill="#a855f7" />
@@ -285,59 +297,61 @@
             <!-- 舞台延伸台地面格線 -->
             <div id="vf-grid-floor" class="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(to_right,rgba(34,211,238,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.12)_1px,transparent_1px)] bg-[size:24px_12px]" style="transform: perspective(120px) rotateX(60deg);"></div>
 
-            <!-- 主體講者剪影 (保持半身構圖大小相近，展現舞台背板相對放大與壓縮) -->
+            <!-- 主體講者剪影 -->
             <div id="vf-subject" class="relative z-10 flex flex-col items-center">
-              <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-cyan-400/90 border-2 border-white shadow-[0_0_15px_#22d3ee]"></div>
-              <div class="w-12 h-12 sm:w-14 sm:h-14 mt-1 rounded-t-2xl bg-slate-200/90 border-2 border-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.35)]"></div>
+              <div class="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-cyan-400/90 border-2 border-white shadow-[0_0_15px_#22d3ee]"></div>
+              <div class="w-9 h-9 sm:w-12 sm:h-12 mt-0.5 sm:mt-1 rounded-t-xl sm:rounded-t-2xl bg-slate-200/90 border-2 border-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.35)]"></div>
             </div>
 
             <!-- 觀景窗十字準星與人眼追蹤對焦框 -->
-            <div class="absolute inset-2 border border-slate-700/60 pointer-events-none flex items-center justify-center">
-              <div class="w-16 h-16 border border-cyan-400/50 rounded-sm relative">
+            <div class="absolute inset-1.5 sm:inset-2 border border-slate-700/60 pointer-events-none flex items-center justify-center">
+              <div class="w-11 h-11 sm:w-14 sm:h-14 border border-cyan-400/50 rounded-sm relative">
                 <span class="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-cyan-400"></span>
                 <span class="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-cyan-400"></span>
                 <span class="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-cyan-400"></span>
                 <span class="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-cyan-400"></span>
               </div>
-              <span class="absolute bottom-1.5 left-2 text-[10px] font-mono text-cyan-300/80">[AF-C] SPEAKER EYE-LOCK</span>
-              <span id="vf-compression-tag" class="absolute bottom-1.5 right-2 text-[10px] font-mono text-amber-300/90">場地拉伸: 極高</span>
+              <span class="hidden sm:inline-block absolute bottom-1 left-2 text-[10px] font-mono text-cyan-300/80">[AF-C] SPEAKER EYE-LOCK</span>
+              <span id="vf-compression-tag" class="absolute bottom-1 right-2 text-[9px] sm:text-[10px] font-mono text-amber-300/90">場地拉伸: 極高</span>
             </div>
           </div>
         </div>
 
         <!-- 右側：即時光學遙測儀表板 -->
-        <div class="lg:col-span-5 grid grid-cols-3 gap-2.5 font-mono">
-          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
-            <div class="text-[10px] text-slate-400 uppercase">當前等效焦距</div>
-            <div id="metric-focal" class="text-xl sm:text-2xl font-bold text-cyan-400 mt-1">16mm</div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+        <div class="lg:col-span-5 grid grid-cols-3 gap-2 sm:gap-2.5 font-mono">
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">當前等效焦距</div>
+            <div id="metric-focal" class="text-base sm:text-2xl font-bold text-cyan-400 mt-0.5 sm:mt-1">16mm</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
               <div id="bar-focal" class="h-full bg-cyan-400 w-[8%]"></div>
             </div>
           </div>
 
-          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
-            <div class="text-[10px] text-slate-400 uppercase">對角線視角 (FOV)</div>
-            <div id="metric-fov" class="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">107°</div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">對角線視角</div>
+            <div id="metric-fov" class="text-base sm:text-2xl font-bold text-emerald-400 mt-0.5 sm:mt-1">107°</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
               <div id="bar-fov" class="h-full bg-emerald-400 w-[95%]"></div>
             </div>
           </div>
 
-          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
-            <div class="text-[10px] text-slate-400 uppercase">背板壓縮指數</div>
-            <div id="metric-compression" class="text-xl sm:text-2xl font-bold text-purple-400 mt-1">12%</div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">背板壓縮率</div>
+            <div id="metric-compression" class="text-base sm:text-2xl font-bold text-purple-400 mt-0.5 sm:mt-1">12%</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
               <div id="bar-compression" class="h-full bg-purple-400 w-[12%]"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 中央核心舞台：SVG 平滑曲線導軌 + 左右交錯階段說明卡片 -->
-      <div class="relative flex-1 my-2 flex items-center justify-center">
+      <!-- [CENTER STAGE] 中央核心舞台：RWD 雙模式混合編排
+           - 小螢幕 (<1024px)：上方顯示 SVG 向量導軌視窗，下方以單一焦點卡槽疊放顯示當前 Active 階段卡片（零重疊、不裁切）
+           - 大螢幕 (>=1024px)：中央絕對定位貫穿 SVG 曲線，左右兩側以 12 欄 Grid 對稱交錯陳列 4 個階段卡片 -->
+      <div class="relative flex-1 min-h-0 flex flex-col lg:block justify-between">
 
-        <!-- 中央自定義平滑 SVG 曲線導軌 -->
-        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <!-- 1. 中央自定義平滑 SVG 曲線導軌 (手機版佔上半部彈性高度，桌機版絕對定位貫穿全舞台) -->
+        <div class="relative w-full h-[38%] sm:h-[44%] lg:h-full lg:absolute lg:inset-0 flex items-center justify-center pointer-events-none shrink-0">
           <svg id="timeline-svg" class="w-full h-full max-w-4xl pointer-events-auto" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
             <defs>
               <!-- 螢光漸層色 -->
@@ -369,7 +383,7 @@
             <!-- 光學參考座標軸線 -->
             <line x1="400" y1="30" x2="400" y2="570" stroke="#1e293b" stroke-dasharray="4 6" stroke-width="1" />
 
-            <!-- 1. 靜態底軌 (Static Base Track) -->
+            <!-- 靜態底軌 (Static Base Track) -->
             <path
               id="svg-base-track"
               d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
@@ -387,7 +401,7 @@
               stroke-linecap="round"
             />
 
-            <!-- 2. 動態描邊軌 (Active Draw Track with Glow) -->
+            <!-- 動態描邊軌 (Active Draw Track with Glow) -->
             <path
               id="svg-active-track"
               d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
@@ -405,132 +419,119 @@
               <circle r="5" fill="#ffffff" filter="url(#neon-glow)" />
             </g>
 
-            <!-- 3. 四個可互動 SVG 階段節點 (Hover 放大 + 點擊平滑捲動) -->
-            <!-- Node 01: 16mm (400, 55) -->
+            <!-- 四個可互動 SVG 階段節點 (Hover 放大 + 點擊平滑捲動) -->
             <g class="timeline-node is-active" data-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="跳轉至 Phase 01: 16mm 場地空景與大合照">
               <circle class="node-pulse" cx="400" cy="55" r="24" fill="rgba(34, 211, 238, 0.12)" />
               <circle class="node-outer" cx="400" cy="55" r="13" fill="#020617" stroke="#22d3ee" stroke-width="3" filter="url(#neon-glow)" />
               <circle class="node-core" cx="400" cy="55" r="5.5" fill="#22d3ee" />
-              <text x="424" y="60" fill="#22d3ee" font-family="JetBrains Mono" font-size="12" font-weight="700">01 // 16mm</text>
+              <text x="424" y="60" fill="#22d3ee" font-family="JetBrains Mono" font-size="13" font-weight="700">01 // 16mm</text>
             </g>
 
-            <!-- Node 02: 35mm (260, 225) -->
             <g class="timeline-node" data-phase="1" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="跳轉至 Phase 02: 35mm 迎賓寒暄與茶敘跟拍">
               <circle class="node-pulse" cx="260" cy="225" r="24" fill="rgba(52, 211, 153, 0.10)" />
               <circle class="node-outer" cx="260" cy="225" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="260" cy="225" r="5.5" fill="#94a3b8" />
-              <text x="155" y="230" fill="#34d399" font-family="JetBrains Mono" font-size="12" font-weight="700">02 // 35mm</text>
+              <text x="148" y="230" fill="#34d399" font-family="JetBrains Mono" font-size="13" font-weight="700">02 // 35mm</text>
             </g>
 
-            <!-- Node 03: 85mm (540, 375) -->
             <g class="timeline-node" data-phase="2" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="跳轉至 Phase 03: 85mm 主講特寫與台下反應">
               <circle class="node-pulse" cx="540" cy="375" r="24" fill="rgba(168, 85, 247, 0.10)" />
               <circle class="node-outer" cx="540" cy="375" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="540" cy="375" r="5.5" fill="#94a3b8" />
-              <text x="564" y="380" fill="#c084fc" font-family="JetBrains Mono" font-size="12" font-weight="700">03 // 85mm</text>
+              <text x="564" y="380" fill="#c084fc" font-family="JetBrains Mono" font-size="13" font-weight="700">03 // 85mm</text>
             </g>
 
-            <!-- Node 04: 200mm (400, 545) -->
             <g class="timeline-node" data-phase="3" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="跳轉至 Phase 04: 200mm 舞台壓縮與遠距抓拍">
               <circle class="node-pulse" cx="400" cy="545" r="24" fill="rgba(251, 191, 36, 0.10)" />
               <circle class="node-outer" cx="400" cy="545" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="400" cy="545" r="5.5" fill="#94a3b8" />
-              <text x="424" y="550" fill="#fbbf24" font-family="JetBrains Mono" font-size="12" font-weight="700">04 // 200mm</text>
+              <text x="424" y="550" fill="#fbbf24" font-family="JetBrains Mono" font-size="13" font-weight="700">04 // 200mm</text>
             </g>
           </svg>
         </div>
 
-        <!-- 階段卡片顯示區 (對應 4 個 Phase) -->
-        <div class="relative z-20 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pointer-events-none">
+        <!-- 2. 階段說明卡片容器 (RWD 混合矩陣：手機版同格疊放切換，桌機版 12 欄左右對稱交錯) -->
+        <div class="relative z-20 flex-1 lg:h-full w-full grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-3 lg:gap-x-6 lg:gap-y-4 items-center pointer-events-none">
 
-          <!-- 左側卡片槽：放置 Phase 01 & Phase 03 -->
-          <div class="lg:col-span-5 flex flex-col gap-6">
-            <!-- PHASE 01 -->
-            <article id="phase-card-0" data-phase-card="0" class="phase-card is-active pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/80 border border-cyan-500/50 cursor-pointer" title="點擊捲動鎖定至此階段">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
-                  PHASE 01 — 16mm VENUE &amp; CROWD
-                </span>
-                <span class="text-xs font-mono text-slate-400">FOV 107°</span>
-              </div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                壓軸大合照與爆滿氣勢
-              </h2>
-              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
-                千人論壇最後的大合照，台下第一排離舞台邊緣往往不到 2 公尺。退無可退時，16mm 的 107° 超廣視角能一口氣吞下整面 12 公尺寬的主視覺 LED 牆與全場舉起手機的觀眾；就算是只有 50 人的小型講座，蹲在走道低角度仰拍，也能靠廣角拉伸感交出「全場爆滿」的公關照。
-              </p>
-              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-cyan-300/90">
-                <span>實戰站位：舞台前緣 / 全場制高點</span>
-                <span>注意：人物別放畫面最邊緣以免變形</span>
-              </div>
-            </article>
+          <!-- PHASE 01 (桌機：左欄上排；手機：中央疊層) -->
+          <article id="phase-card-0" data-phase-card="0" class="phase-card is-active col-start-1 row-start-1 lg:col-span-5 lg:col-start-1 lg:row-start-1 lg:self-start pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/85 border border-cyan-500/50 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                PHASE 01 — 16mm VENUE &amp; CROWD
+              </span>
+              <span class="text-xs font-mono text-slate-400">FOV 107°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              壓軸大合照與爆滿氣勢
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              千人論壇最後的大合照，台下第一排離舞台邊緣往往不到 2 公尺。退無可退時，16mm 的 107° 超廣視角能一口氣吞下整面 12 公尺寬的主視覺 LED 牆與全場舉起手機的觀眾；就算是 50 人的小型講座，蹲在走道低角度仰拍，也能靠廣角拉伸感交出「全場爆滿」的公關照。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-mono text-cyan-300/90">
+              <span>站位：舞台前緣 / 制高點</span>
+              <span>注意：人物勿放畫面最邊緣</span>
+            </div>
+          </article>
 
-            <!-- PHASE 03 -->
-            <article id="phase-card-2" data-phase-card="2" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40">
-                  PHASE 03 — 85mm KEYNOTE &amp; VIP
-                </span>
-                <span class="text-xs font-mono text-slate-400">FOV 28.5°</span>
-              </div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                講者眼神特寫與雜物剝離
-              </h2>
-              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
-                活動會場到處是破壞畫面的礦泉水瓶、麥克風線、逃生指示燈與發呆的工作人員。退到 3 公尺外換上 85mm f/1.4，28.5° 的窄視角加上淺景深，能瞬間把講者身後的雜亂背景融化為柔和光斑，精準鎖定主講人比手勢的瞬間與台下 VIP 專注點頭的側臉。
-              </p>
-              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-purple-300/90">
-                <span>實戰站位：舞台側翼 / 第一排走道 (2.5m–4m)</span>
-                <span>主體分離度：極高</span>
-              </div>
-            </article>
-          </div>
+          <!-- PHASE 02 (桌機：右欄上排；手機：中央疊層) -->
+          <article id="phase-card-1" data-phase-card="1" class="phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-center pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                PHASE 02 — 35mm NETWORKING &amp; BOOTH
+              </span>
+              <span class="text-xs font-mono text-slate-400">FOV 63°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              茶敘敬酒與展攤互動跟拍
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              中場休息的 VIP 交流區與簽到背板前，通道擠滿端著香檳的來賓，根本退不到兩公尺外。掛上 35mm 站在 1.2 公尺社交距離抓拍，既能清楚拍下貴賓交換名片、碰杯大笑的表情，又能把背後的贊助商 Logo 與展攤陳設完整帶入，交代現場故事脈絡。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-mono text-emerald-300/90">
+              <span>站位：報到櫃檯 / 展攤走道 (1.2m)</span>
+              <span>敘事平衡：人景五五開</span>
+            </div>
+          </article>
 
-          <!-- 中央留白給 SVG 曲線 -->
-          <div class="hidden lg:block lg:col-span-2"></div>
+          <!-- PHASE 03 (桌機：左欄下排；手機：中央疊層) -->
+          <article id="phase-card-2" data-phase-card="2" class="phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-1 lg:row-start-2 lg:self-center pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40">
+                PHASE 03 — 85mm KEYNOTE &amp; VIP
+              </span>
+              <span class="text-xs font-mono text-slate-400">FOV 28.5°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              講者眼神特寫與雜物剝離
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              活動會場到處是破壞畫面的礦泉水瓶、麥克風線、逃生指示燈與發呆的工作人員。退到 3 公尺外換上 85mm f/1.4，28.5° 窄視角加上淺景深，能瞬間把講者身後的雜亂背景融化為柔和光斑，精準鎖定主講人比手勢的瞬間與台下 VIP 專注點頭的側臉。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-mono text-purple-300/90">
+              <span>站位：舞台側翼 / 第一排走道 (3m)</span>
+              <span>主體分離度：極高</span>
+            </div>
+          </article>
 
-          <!-- 右側卡片槽：放置 Phase 02 & Phase 04 -->
-          <div class="lg:col-span-5 flex flex-col gap-6">
-            <!-- PHASE 02 -->
-            <article id="phase-card-1" data-phase-card="1" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                  PHASE 02 — 35mm NETWORKING &amp; BOOTH
-                </span>
-                <span class="text-xs font-mono text-slate-400">FOV 63°</span>
-              </div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                茶敘敬酒與展攤互動跟拍
-              </h2>
-              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
-                中場休息的 VIP 交流區與簽到背板前，通道擠滿端著香檳的來賓，你根本退不到兩公尺外。掛上 35mm 站在 1.2 公尺的社交距離直接盲拍或抓拍，既能清楚拍下貴賓交換名片、碰杯大笑的表情，又能把背後的贊助商 Logo 與展攤陳設完整帶入，交代活動現場的故事脈絡。
-              </p>
-              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-emerald-300/90">
-                <span>實戰站位：報到櫃檯 / 展攤走道 (1.0m–1.8m)</span>
-                <span>敘事平衡：人景五五開</span>
-              </div>
-            </article>
-
-            <!-- PHASE 04 -->
-            <article id="phase-card-3" data-phase-card="3" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
-                  PHASE 04 — 200mm STAGE COMPRESSION
-                </span>
-                <span class="text-xs font-mono text-slate-400">FOV 12°</span>
-              </div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                遠距零干擾狙擊與滿版背板壓縮
-              </h2>
-              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
-                頒獎典禮或啟動儀式時，你不能衝上台擋住台下長官與轉播攝影機的視線。站在 10 公尺外的中場走道端起 200mm，僅 12° 的視角能越過前排黑壓壓的後腦勺，把原本離講者 4 公尺遠的舞台 LED 主視覺硬生生拉近貼滿整個背景，連得獎者眼眶泛淚、彩帶飄落的瞬間都無所遁形。
-              </p>
-              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-amber-300/90">
-                <span>實戰站位：中後排走道 / 音控台旁 (8m–20m)</span>
-                <span>空間壓縮感：背板滿版貼合</span>
-              </div>
-            </article>
-          </div>
+          <!-- PHASE 04 (桌機：右欄下排；手機：中央疊層) -->
+          <article id="phase-card-3" data-phase-card="3" class="phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                PHASE 04 — 200mm STAGE COMPRESSION
+              </span>
+              <span class="text-xs font-mono text-slate-400">FOV 12°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              遠距零干擾狙擊與滿版背板壓縮
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              頒獎典禮或啟動儀式時，你不能衝上台擋住台下長官與轉播攝影機的視線。站在 10 公尺外的中場走道端起 200mm，僅 12° 視角能越過前排黑壓壓的後腦勺，把原本離講者 4 公尺遠的舞台 LED 主視覺硬生生拉近貼滿整個背景，連得獎者眼眶泛淚的瞬間都無所遁形。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-mono text-amber-300/90">
+              <span>站位：中後排走道 / 音控台旁 (10m+)</span>
+              <span>空間壓縮感：背板滿版貼合</span>
+            </div>
+          </article>
 
         </div>
       </div>
@@ -538,127 +539,127 @@
     </div>
 
     <!-- ==================== 底部 HUD 快捷切換導覽列 ==================== -->
-    <nav aria-label="焦段階段快捷切換 HUD" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-2xl">
-      <div class="p-1.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.75)] flex items-center justify-between gap-1.5">
-        <button type="button" data-hud-btn="0" class="hud-btn is-active flex-1 py-2.5 px-3 rounded-xl border border-transparent text-left font-mono flex flex-col items-start">
-          <span class="text-[10px] text-cyan-400 font-bold">PHASE 01</span>
-          <span class="text-xs sm:text-sm font-bold">16mm 全場大景</span>
+    <nav aria-label="焦段階段快捷切換 HUD" class="fixed bottom-3 sm:bottom-5 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-2xl">
+      <div class="p-1 sm:p-1.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.75)] grid grid-cols-4 gap-1 sm:gap-1.5">
+        <button type="button" data-hud-btn="0" class="hud-btn is-active py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border border-transparent text-left font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-cyan-400 font-bold">PHASE 01</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">16mm 全場大景</span>
         </button>
 
-        <button type="button" data-hud-btn="1" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
-          <span class="text-[10px] text-emerald-400 font-bold">PHASE 02</span>
-          <span class="text-xs sm:text-sm font-bold">35mm 茶敘互動</span>
+        <button type="button" data-hud-btn="1" class="hud-btn py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-emerald-400 font-bold">PHASE 02</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">35mm 茶敘互動</span>
         </button>
 
-        <button type="button" data-hud-btn="2" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
-          <span class="text-[10px] text-purple-400 font-bold">PHASE 03</span>
-          <span class="text-xs sm:text-sm font-bold">85mm 講者特寫</span>
+        <button type="button" data-hud-btn="2" class="hud-btn py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-purple-400 font-bold">PHASE 03</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">85mm 講者特寫</span>
         </button>
 
-        <button type="button" data-hud-btn="3" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
-          <span class="text-[10px] text-amber-400 font-bold">PHASE 04</span>
-          <span class="text-xs sm:text-sm font-bold">200mm 舞台狙擊</span>
+        <button type="button" data-hud-btn="3" class="hud-btn py-2 px-2 sm:py-2.5 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-amber-400 font-bold">PHASE 04</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">200mm 舞台狙擊</span>
         </button>
       </div>
     </nav>
   </section>
 
   <!-- ==================== 3. 後續結論與活動攝影光學實測數據區塊 ==================== -->
-  <section id="conclusion-section" class="relative z-20 py-28 px-6 bg-slate-950 border-t border-slate-800/80">
-    <div class="max-w-6xl mx-auto space-y-16">
+  <section id="conclusion-section" class="relative z-20 py-24 sm:py-28 px-4 sm:px-6 bg-slate-950 border-t border-slate-800/80">
+    <div class="max-w-6xl mx-auto space-y-14 sm:space-y-16">
 
       <!-- 結論標題與核心洞察 -->
       <div class="max-w-3xl space-y-4">
         <div class="inline-flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-widest">
           <span>EVENT COVERAGE OPTICS // 活動攝影雙機流與焦段數據對照</span>
         </div>
-        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+        <h2 class="text-2xl sm:text-5xl font-black text-white tracking-tight leading-tight">
           活動現場沒時間讓你慢慢換鏡頭，站位距離決定你的畫面說服力。
         </h2>
-        <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+        <p class="text-slate-300 text-sm sm:text-lg leading-relaxed">
           在光學物理上，透視關係只取決於你與被攝者的距離。當主講人突然與台下第一排貴賓握手、緊接著退回舞台中央致詞，流程往往只有短短 5 秒鐘。理解 16mm 到 200mm 的視角裁切與背景壓縮特性，你才能預判該「往前衝進人群」還是「退後靠長焦壓縮背板」，張張都是公關發稿直接能用的黃金畫面。
         </p>
       </div>
 
       <!-- 數據對照矩陣表格 -->
       <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-md shadow-2xl">
-        <table class="w-full text-left border-collapse font-mono text-sm">
+        <table class="w-full text-left border-collapse font-mono text-xs sm:text-sm min-w-[680px]">
           <thead>
-            <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs uppercase">
-              <th class="py-4 px-5">階段 / 焦段</th>
-              <th class="py-4 px-5">對角線視角 (FOV)</th>
-              <th class="py-4 px-5">活動實戰站位距離</th>
-              <th class="py-4 px-5">f/2.8 景深範圍 (DoF)</th>
-              <th class="py-4 px-5">舞台與背景視覺特徵</th>
-              <th class="py-4 px-5">活動公關必拍畫面 (Shot List)</th>
+            <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-[11px] sm:text-xs uppercase">
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">階段 / 焦段</th>
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">對角線視角 (FOV)</th>
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">活動實戰站位距離</th>
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">f/2.8 景深範圍 (DoF)</th>
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">舞台與背景視覺特徵</th>
+              <th class="py-3.5 px-4 sm:py-4 sm:px-5">活動公關必拍畫面 (Shot List)</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/70 text-slate-200">
             <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-4 px-5 font-bold text-cyan-400">Phase 01 // 16mm</td>
-              <td class="py-4 px-5">107.0°</td>
-              <td class="py-4 px-5">0.5m – 2.0m</td>
-              <td class="py-4 px-5">0.38 m (深景深全清)</td>
-              <td class="py-4 px-5">場地縱深極度誇張、人潮湧動張力</td>
-              <td class="py-4 px-5 font-sans text-slate-300">百人大合照、滿座全場空景、剪綵氣勢仰拍</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-bold text-cyan-400">Phase 01 // 16mm</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">107.0°</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">0.5m – 2.0m</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">0.38 m (深景深全清)</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">場地縱深極度誇張、人潮湧動張力</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-sans text-slate-300">百人大合照、滿座全場空景、剪綵氣勢仰拍</td>
             </tr>
             <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-4 px-5 font-bold text-emerald-400">Phase 02 // 35mm</td>
-              <td class="py-4 px-5">63.4°</td>
-              <td class="py-4 px-5">1.2m – 2.5m</td>
-              <td class="py-4 px-5">0.26 m (人景皆清楚)</td>
-              <td class="py-4 px-5">第一人稱臨場視野、主體與環境均衡</td>
-              <td class="py-4 px-5 font-sans text-slate-300">報到簽名、VIP 敬酒寒暄、展攤體驗互動</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-bold text-emerald-400">Phase 02 // 35mm</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">63.4°</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">1.2m – 2.5m</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">0.26 m (人景皆清楚)</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">第一人稱臨場視野、主體與環境均衡</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-sans text-slate-300">報到簽名、VIP 敬酒寒暄、展攤體驗互動</td>
             </tr>
             <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-4 px-5 font-bold text-purple-400">Phase 03 // 85mm</td>
-              <td class="py-4 px-5">28.5°</td>
-              <td class="py-4 px-5">2.5m – 4.5m</td>
-              <td class="py-4 px-5">0.14 m (淺景深柔化)</td>
-              <td class="py-4 px-5">過濾桌水瓶與雜物、臉部五官立體</td>
-              <td class="py-4 px-5 font-sans text-slate-300">講者手勢半身照、貴賓聽講神情、主持人特寫</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-bold text-purple-400">Phase 03 // 85mm</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">28.5°</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">2.5m – 4.5m</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">0.14 m (淺景深柔化)</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">過濾桌水瓶與雜物、臉部五官立體</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-sans text-slate-300">講者手勢半身照、貴賓聽講神情、主持人特寫</td>
             </tr>
             <tr class="hover:bg-slate-800/40 transition-colors">
-              <td class="py-4 px-5 font-bold text-amber-400">Phase 04 // 200mm</td>
-              <td class="py-4 px-5">12.3°</td>
-              <td class="py-4 px-5">6.5m – 20m+</td>
-              <td class="py-4 px-5">0.08 m (極淺刀切景深)</td>
-              <td class="py-4 px-5">遠方主視覺背板拉近貼滿、零干擾</td>
-              <td class="py-4 px-5 font-sans text-slate-300">遠距主講人情緒、頒獎擁抱瞬間、前後景人潮壓縮</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-bold text-amber-400">Phase 04 // 200mm</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">12.3°</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">6.5m – 20m+</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">0.08 m (極淺刀切景深)</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5">遠方主視覺背板拉近貼滿、零干擾</td>
+              <td class="py-3.5 px-4 sm:py-4 sm:px-5 font-sans text-slate-300">遠距主講人情緒、頒獎擁抱瞬間、前後景人潮壓縮</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- 3 個活動攝影實戰光學結論卡片 -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5 sm:space-y-3">
           <div class="text-xs font-mono text-cyan-400">FIELD TIP 01 // 經典雙機流配置</div>
-          <h3 class="text-xl font-bold text-white">左肩 16-35mm 搶大景，右肩 70-200mm 抓特寫</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">
+          <h3 class="text-lg sm:text-xl font-bold text-white">左肩 16-35mm 搶大景，右肩 70-200mm 抓特寫</h3>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
             活動攝影師最怕錯失瞬間。左機掛廣角應付突如其來的貴賓合照與狹窄走道跟拍；右機掛長焦隨時狙擊舞台上的講者手勢與台下大笑，不換鏡才能全場零漏網。
           </p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+        <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5 sm:space-y-3">
           <div class="text-xs font-mono text-purple-400">FIELD TIP 02 // 拯救凌亂會場</div>
-          <h3 class="text-xl font-bold text-white">場地布置太簡陋？退後換 85mm 切乾淨</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">
+          <h3 class="text-lg sm:text-xl font-bold text-white">場地布置太簡陋？退後換 85mm 切乾淨</h3>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
             遇到小型會議室白牆、外露線材或便當盒堆在角落時，千萬別硬用廣角。退後兩步換上 85mm 或拉到 200mm，把視角縮窄到 28° 以內，畫面只留講者與乾淨的局部背板。
           </p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+        <div class="p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5 sm:space-y-3">
           <div class="text-xs font-mono text-amber-400">FIELD TIP 03 // 公關發稿必備視覺</div>
-          <h3 class="text-xl font-bold text-white">人少用 200mm 壓出擁擠感，人多用 16mm 拍氣勢</h3>
-          <p class="text-sm text-slate-400 leading-relaxed">
+          <h3 class="text-lg sm:text-xl font-bold text-white">人少用 200mm 壓出擁擠感，人多用 16mm 拍氣勢</h3>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
             當台下座位沒坐滿時，從第一排斜側面用 200mm 貼著前排觀眾肩膀拍向講者，長焦壓縮會讓前後三排觀眾看起來像座無虛席；全場滿座時再站上高處用 16mm 一網打盡。
           </p>
         </div>
       </div>
 
       <!-- 返回頂部與重新體驗 -->
-      <div class="pt-8 pb-12 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+      <div class="pt-8 pb-16 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
         <div>EVENT_OPTICS // SCROLLYTELLING VECTOR TIMELINE • GSAP 3 + SCROLLTRIGGER</div>
         <button id="back-to-top-btn" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-800 transition-colors">
           ↑ 返回頂部重新捲動
@@ -806,7 +807,6 @@
       // 根據線性插值計算當前進度的連續光學數值
       function interpolateMetrics(progress) {
         const clamped = Math.max(0, Math.min(1, progress));
-        // 找出落在哪兩個節點區間
         let segIndex = 0;
         for (let i = 0; i < nodeRatios.length - 1; i++) {
           if (clamped >= nodeRatios[i] && clamped <= nodeRatios[i + 1]) {
@@ -834,7 +834,7 @@
         };
       }
 
-      // 切換當前高亮的階段 (SVG 節點 + 階段說明卡片 + HUD 快捷按鈕)
+      // 切換當前高亮的階段 (SVG 節點 + RWD 階段說明卡片 + HUD 快捷按鈕)
       function setActivePhase(index) {
         if (currentActiveIndex === index) return;
         currentActiveIndex = index;
@@ -846,7 +846,7 @@
         vfCompressionTag.textContent = activeData.compressionTag;
 
         // 更新環境光球顏色
-        ambientGlow.className = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full blur-[140px] pointer-events-none transition-colors duration-700 ${activeData.glowClass}`;
+        ambientGlow.className = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[560px] h-[320px] sm:h-[560px] rounded-full blur-[130px] pointer-events-none transition-colors duration-700 ${activeData.glowClass}`;
 
         // 1. 同步 SVG 節點狀態
         svgNodes.forEach((node, i) => {
@@ -863,25 +863,27 @@
           }
         });
 
-        // 2. 同步階段卡片進退場與高亮動效
-        phaseCards.forEach((card, i) => {
-          if (i === index) {
+        // 2. 同步階段卡片進退場與高亮動效 (支援 RWD 手機單張切換 & 桌機四張交錯聚焦)
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        phaseCards.forEach((card) => {
+          const cardIdx = parseInt(card.getAttribute('data-phase-card'), 10);
+          if (cardIdx === index) {
             card.classList.add('is-active');
             gsap.to(card, {
               opacity: 1,
               scale: 1,
               y: 0,
-              duration: 0.45,
+              duration: 0.42,
               ease: 'power3.out',
               overwrite: 'auto'
             });
           } else {
             card.classList.remove('is-active');
             gsap.to(card, {
-              opacity: 0.35,
+              opacity: isDesktop ? 0.35 : 0,
               scale: 0.96,
-              y: 6,
-              duration: 0.4,
+              y: isDesktop ? 6 : 12,
+              duration: 0.35,
               ease: 'power2.out',
               overwrite: 'auto'
             });
@@ -1016,8 +1018,11 @@
         });
       });
 
-      // 視窗尺寸改變時重新計算 ScrollTrigger
+      // 視窗尺寸改變時重新計算 ScrollTrigger 與 RWD 卡片透明度
       window.addEventListener('resize', () => {
+        const idx = currentActiveIndex;
+        currentActiveIndex = -1;
+        setActivePhase(idx >= 0 ? idx : 0);
         ScrollTrigger.refresh();
       });
     });

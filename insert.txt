@@ -1,0 +1,819 @@
+<!-- =====================================================================
+  EVENT OPTICS // 活動攝影焦段實戰時間軸 (RWD 響應式可直接嵌入網站 Custom HTML 版本)
+  - 獨立 Scoped CSS (#eo-scrolly-widget)，不污染外部網站全域樣式
+  - 重構「主容器：三欄式/絕對定位混合編排」RWD 架構：
+      * 桌機版 (>=1024px)：中央絕對定位貫穿 SVG 曲線 + 12 欄雙列對稱交錯陳列 4 張階段卡
+      * 手機/平板 (<1024px)：上半部獨立顯示 SVG 向量導軌視窗 + 下半部單一焦點卡槽疊層切換（零裁切、零重疊）
+  - 內建動態載入 Tailwind CSS 與 GSAP 3 (ScrollTrigger / ScrollToPlugin)
+====================================================================== -->
+
+<div id="eo-scrolly-widget" class="eo-widget-root">
+  <style>
+    #eo-scrolly-widget {
+      --neon-cyan: #22d3ee;
+      --neon-emerald: #34d399;
+      --neon-violet: #a855f7;
+      --neon-amber: #fbbf24;
+      background-color: #020617;
+      color: #f8fafc;
+      font-family: "Noto Sans TC", system-ui, -apple-system, sans-serif;
+      position: relative;
+      width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    #eo-scrolly-widget *,
+    #eo-scrolly-widget *::before,
+    #eo-scrolly-widget *::after {
+      box-sizing: border-box;
+    }
+
+    #eo-scrolly-widget .eo-font-mono {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* 科技微網格背景 */
+    #eo-scrolly-widget .eo-bg-tech-grid {
+      background-size: 48px 48px;
+      background-image: 
+        linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+    }
+
+    #eo-scrolly-widget .eo-bg-radial-vignette {
+      background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.2) 0%, rgba(2, 6, 23, 0.92) 85%);
+    }
+
+    /* SVG 節點與微動效 */
+    #eo-scrolly-widget .eo-timeline-node {
+      cursor: pointer;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: filter 0.3s ease;
+    }
+
+    #eo-scrolly-widget .eo-timeline-node .node-outer,
+    #eo-scrolly-widget .eo-timeline-node .node-core,
+    #eo-scrolly-widget .eo-timeline-node .node-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease, fill 0.3s ease, opacity 0.3s ease;
+    }
+
+    #eo-scrolly-widget .eo-timeline-node:hover .node-outer {
+      transform: scale(1.45);
+      stroke: #22d3ee;
+    }
+
+    #eo-scrolly-widget .eo-timeline-node:hover .node-core {
+      transform: scale(1.3);
+      fill: #ffffff;
+    }
+
+    #eo-scrolly-widget .eo-timeline-node.is-active .node-outer {
+      transform: scale(1.35);
+      stroke: var(--active-color, #22d3ee);
+    }
+
+    #eo-scrolly-widget .eo-timeline-node.is-active .node-core {
+      transform: scale(1.2);
+      fill: var(--active-color, #22d3ee);
+    }
+
+    /* 卡片轉場與玻璃擬態 */
+    #eo-scrolly-widget .eo-phase-card {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    #eo-scrolly-widget .eo-phase-card.is-active {
+      border-color: rgba(34, 211, 238, 0.55);
+      box-shadow: 0 0 35px -5px rgba(34, 211, 238, 0.22), inset 0 0 20px rgba(34, 211, 238, 0.06);
+    }
+
+    /* RWD 響應式階段卡片切換：手機/平板 (<1024px) 僅顯示當前 Active 卡片，桌機 (>=1024px) 四張全顯交錯 */
+    @media (max-width: 1023px) {
+      #eo-scrolly-widget .eo-phase-card:not(.is-active) {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(12px) scale(0.96) !important;
+      }
+      #eo-scrolly-widget .eo-phase-card.is-active {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: translateY(0) scale(1) !important;
+        z-index: 30;
+      }
+    }
+
+    /* HUD 按鈕高亮狀態 */
+    #eo-scrolly-widget .eo-hud-btn {
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    #eo-scrolly-widget .eo-hud-btn.is-active {
+      background: rgba(34, 211, 238, 0.16);
+      border-color: rgba(34, 211, 238, 0.8);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #eo-scrolly-widget *,
+      #eo-scrolly-widget *::before,
+      #eo-scrolly-widget *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+
+  <!-- ==================== PINNED 核心展示視窗區塊 (RWD 重構版) ==================== -->
+  <section id="eo-pinned-stage" class="relative w-full h-[100dvh] overflow-hidden bg-slate-950 eo-bg-tech-grid select-none">
+    <div class="absolute inset-0 eo-bg-radial-vignette pointer-events-none"></div>
+
+    <!-- 區塊頂部內嵌進度條與狀態列 (不覆蓋外部網站原本的 Header) -->
+    <div class="relative z-30 w-full bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+      <div class="relative w-full h-1 bg-slate-900 overflow-hidden" aria-hidden="true">
+        <div id="eo-top-progress-bar" class="w-full h-full origin-left scale-x-0 bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-500 shadow-[0_0_12px_#22d3ee]"></div>
+      </div>
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-10 sm:h-11 flex items-center justify-between text-xs eo-font-mono">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+          <span class="tracking-widest text-slate-200 font-bold text-[11px] sm:text-xs">EVENT_OPTICS // 活動攝影焦段時間軸</span>
+        </div>
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="hidden sm:flex items-center gap-1.5 text-slate-400">
+            <span>FOCAL:</span>
+            <span id="eo-header-focal-readout" class="text-cyan-400 font-bold">16mm</span>
+          </div>
+          <div class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-300 font-semibold text-[11px] sm:text-xs">
+            SCROLL <span id="eo-top-progress-text">000%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 動態光學氛圍背景光球 -->
+    <div id="eo-ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[560px] h-[320px] sm:h-[560px] rounded-full bg-cyan-500/15 blur-[130px] pointer-events-none transition-colors duration-700"></div>
+
+    <!-- 主容器：三欄式/絕對定位混合編排 (RWD 重構版：支援手機單卡疊層 + 桌機 12 欄對稱交錯) -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full h-[calc(100dvh-2.75rem)] px-3 sm:px-6 pt-2.5 sm:pt-4 pb-16 sm:pb-20 flex flex-col justify-between gap-2 sm:gap-3 overflow-hidden">
+
+      <!-- [TOP] 上方狀態列：相機構圖觀景窗模擬 + 即時光學參數面板 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 items-center shrink-0">
+        <!-- 左側：即時觀景窗模擬器 (Stage Viewfinder Simulation) -->
+        <div class="lg:col-span-7 bg-slate-900/80 border border-slate-800/90 rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 backdrop-blur-md shadow-lg">
+          <div class="flex items-center justify-between text-[10px] sm:text-xs eo-font-mono text-slate-400 mb-1.5 sm:mb-2">
+            <div class="flex items-center gap-1.5 sm:gap-2 truncate">
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold shrink-0">STAGE VF</span>
+              <span id="eo-vf-lens-label" class="text-slate-200 font-semibold truncate">16mm f/2.8 GM // 舞台前緣大景</span>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+              <span>FOV <strong id="eo-vf-fov" class="text-cyan-400">107°</strong></span>
+              <span>DIST <strong id="eo-vf-dist" class="text-emerald-400">0.5m</strong></span>
+            </div>
+          </div>
+
+          <!-- 觀景窗畫面：活動舞台桁架、LED 主視覺背板與聚光燈散景模擬 -->
+          <div class="relative w-full h-20 sm:h-28 lg:h-32 rounded-lg sm:rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
+            <!-- 遠景舞台桁架與 LED 巨型螢幕群 (隨焦距放大拉近並模糊) -->
+            <div id="eo-vf-bg-layer" class="absolute inset-0 flex items-end justify-center opacity-75 transition-transform duration-100 origin-bottom" style="transform: scale(0.85);">
+              <svg class="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                <polygon points="0,160 0,95 65,60 130,105 210,40 290,90 370,30 460,85 540,50 600,90 600,160" fill="#0f172a" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.35" />
+                <rect x="85" y="65" width="38" height="95" fill="#1e293b" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.4" />
+                <rect x="235" y="45" width="130" height="115" fill="#1e293b" stroke="#a855f7" stroke-width="1" stroke-opacity="0.5" />
+                <rect x="475" y="65" width="38" height="95" fill="#1e293b" stroke="#34d399" stroke-width="0.8" stroke-opacity="0.4" />
+                <g id="eo-vf-bokeh-group" opacity="0.15">
+                  <circle cx="155" cy="65" r="14" fill="#22d3ee" />
+                  <circle cx="300" cy="55" r="20" fill="#a855f7" />
+                  <circle cx="445" cy="70" r="15" fill="#34d399" />
+                  <circle cx="245" cy="85" r="22" fill="#fbbf24" />
+                </g>
+              </svg>
+            </div>
+
+            <!-- 舞台延伸台地面格線 -->
+            <div class="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(to_right,rgba(34,211,238,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.12)_1px,transparent_1px)] bg-[size:24px_12px]" style="transform: perspective(120px) rotateX(60deg);"></div>
+
+            <!-- 主體講者剪影 -->
+            <div class="relative z-10 flex flex-col items-center">
+              <div class="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-cyan-400/90 border-2 border-white shadow-[0_0_15px_#22d3ee]"></div>
+              <div class="w-9 h-9 sm:w-12 sm:h-12 mt-0.5 sm:mt-1 rounded-t-xl sm:rounded-t-2xl bg-slate-200/90 border-2 border-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.35)]"></div>
+            </div>
+
+            <!-- 觀景窗十字準星與人眼追蹤對焦框 -->
+            <div class="absolute inset-1.5 sm:inset-2 border border-slate-700/60 pointer-events-none flex items-center justify-center">
+              <div class="w-11 h-11 sm:w-14 sm:h-14 border border-cyan-400/50 rounded-sm relative">
+                <span class="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-cyan-400"></span>
+                <span class="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-cyan-400"></span>
+                <span class="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-cyan-400"></span>
+                <span class="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-cyan-400"></span>
+              </div>
+              <span class="hidden sm:inline-block absolute bottom-1 left-2 text-[10px] eo-font-mono text-cyan-300/80">[AF-C] SPEAKER EYE-LOCK</span>
+              <span id="eo-vf-compression-tag" class="absolute bottom-1 right-2 text-[9px] sm:text-[10px] eo-font-mono text-amber-300/90">場地拉伸: 極高</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：即時光學遙測儀表板 -->
+        <div class="lg:col-span-5 grid grid-cols-3 gap-2 sm:gap-2.5 eo-font-mono">
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">當前等效焦距</div>
+            <div id="eo-metric-focal" class="text-base sm:text-2xl font-bold text-cyan-400 mt-0.5 sm:mt-1">16mm</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
+              <div id="eo-bar-focal" class="h-full bg-cyan-400 w-[8%]"></div>
+            </div>
+          </div>
+
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">對角線視角</div>
+            <div id="eo-metric-fov" class="text-base sm:text-2xl font-bold text-emerald-400 mt-0.5 sm:mt-1">107°</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
+              <div id="eo-bar-fov" class="h-full bg-emerald-400 w-[95%]"></div>
+            </div>
+          </div>
+
+          <div class="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-slate-900/80 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase truncate">背板壓縮率</div>
+            <div id="eo-metric-compression" class="text-base sm:text-2xl font-bold text-purple-400 mt-0.5 sm:mt-1">12%</div>
+            <div class="w-full h-1 sm:h-1.5 bg-slate-800 rounded-full mt-1.5 sm:mt-2 overflow-hidden">
+              <div id="eo-bar-compression" class="h-full bg-purple-400 w-[12%]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- [CENTER STAGE] 中央核心舞台：RWD 雙模式混合編排
+           - 小螢幕 (<1024px)：上方顯示 SVG 向量導軌視窗，下方以單一焦點卡槽疊放顯示當前 Active 階段卡片（零重疊、不裁切）
+           - 大螢幕 (>=1024px)：中央絕對定位貫穿 SVG 曲線，左右兩側以 12 欄 Grid 對稱交錯陳列 4 個階段卡片 -->
+      <div class="relative flex-1 min-h-0 flex flex-col lg:block justify-between">
+
+        <!-- 1. 中央自定義平滑 SVG 曲線導軌 (手機版佔上半部彈性高度，桌機版絕對定位貫穿全舞台) -->
+        <div class="relative w-full h-[38%] sm:h-[44%] lg:h-full lg:absolute lg:inset-0 flex items-center justify-center pointer-events-none shrink-0">
+          <svg id="eo-timeline-svg" class="w-full h-full max-w-4xl pointer-events-auto" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="eo-neon-stroke-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" />
+                <stop offset="35%" stop-color="#34d399" />
+                <stop offset="70%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#fbbf24" />
+              </linearGradient>
+
+              <filter id="eo-neon-glow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur1" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <linearGradient id="eo-fov-cone-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <line x1="400" y1="30" x2="400" y2="570" stroke="#1e293b" stroke-dasharray="4 6" stroke-width="1" />
+
+            <!-- 靜態底軌 -->
+            <path
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="#1e293b"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <path
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="#334155"
+              stroke-width="1.5"
+              stroke-dasharray="6 8"
+              stroke-linecap="round"
+            />
+
+            <!-- 動態描邊軌 -->
+            <path
+              id="eo-svg-active-track"
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="url(#eo-neon-stroke-grad)"
+              stroke-width="6"
+              stroke-linecap="round"
+              filter="url(#eo-neon-glow)"
+            />
+
+            <!-- 隨曲線移動的即時光學探頭 -->
+            <g id="eo-svg-playhead" transform="translate(400, 55)">
+              <polygon id="eo-playhead-fov-cone" points="0,0 -48,-55 48,-55" fill="url(#eo-fov-cone-grad)" />
+              <circle r="14" fill="rgba(34, 211, 238, 0.18)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3" />
+              <circle r="5" fill="#ffffff" filter="url(#eo-neon-glow)" />
+            </g>
+
+            <!-- 四個可互動 SVG 階段節點 -->
+            <g class="eo-timeline-node is-active" data-eo-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="跳轉至 Phase 01: 16mm 場地空景與大合照">
+              <circle class="node-pulse" cx="400" cy="55" r="24" fill="rgba(34, 211, 238, 0.12)" />
+              <circle class="node-outer" cx="400" cy="55" r="13" fill="#020617" stroke="#22d3ee" stroke-width="3" filter="url(#eo-neon-glow)" />
+              <circle class="node-core" cx="400" cy="55" r="5.5" fill="#22d3ee" />
+              <text x="424" y="60" fill="#22d3ee" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700">01 // 16mm</text>
+            </g>
+
+            <g class="eo-timeline-node" data-eo-phase="1" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="跳轉至 Phase 02: 35mm 迎賓寒暄與茶敘跟拍">
+              <circle class="node-pulse" cx="260" cy="225" r="24" fill="rgba(52, 211, 153, 0.10)" />
+              <circle class="node-outer" cx="260" cy="225" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="260" cy="225" r="5.5" fill="#94a3b8" />
+              <text x="148" y="230" fill="#34d399" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700">02 // 35mm</text>
+            </g>
+
+            <g class="eo-timeline-node" data-eo-phase="2" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="跳轉至 Phase 03: 85mm 主講特寫與台下反應">
+              <circle class="node-pulse" cx="540" cy="375" r="24" fill="rgba(168, 85, 247, 0.10)" />
+              <circle class="node-outer" cx="540" cy="375" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="540" cy="375" r="5.5" fill="#94a3b8" />
+              <text x="564" y="380" fill="#c084fc" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700">03 // 85mm</text>
+            </g>
+
+            <g class="eo-timeline-node" data-eo-phase="3" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="跳轉至 Phase 04: 200mm 舞台壓縮與遠距抓拍">
+              <circle class="node-pulse" cx="400" cy="545" r="24" fill="rgba(251, 191, 36, 0.10)" />
+              <circle class="node-outer" cx="400" cy="545" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="400" cy="545" r="5.5" fill="#94a3b8" />
+              <text x="424" y="550" fill="#fbbf24" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700">04 // 200mm</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 2. 階段說明卡片容器 (RWD 混合矩陣：手機版同格疊放切換，桌機版 12 欄左右對稱交錯) -->
+        <div class="relative z-20 flex-1 lg:h-full w-full grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-2 gap-3 lg:gap-x-6 lg:gap-y-4 items-center pointer-events-none">
+
+          <!-- PHASE 01 (桌機：左欄上排；手機：中央疊層) -->
+          <article data-eo-card="0" class="eo-phase-card is-active col-start-1 row-start-1 lg:col-span-5 lg:col-start-1 lg:row-start-1 lg:self-start pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/85 border border-cyan-500/50 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs eo-font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                PHASE 01 — 16mm VENUE &amp; CROWD
+              </span>
+              <span class="text-xs eo-font-mono text-slate-400">FOV 107°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              壓軸大合照與爆滿氣勢
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              千人論壇最後的大合照，台下第一排離舞台邊緣往往不到 2 公尺。退無可退時，16mm 的 107° 超廣視角能一口氣吞下整面 12 公尺寬的主視覺 LED 牆與全場舉起手機的觀眾；就算是 50 人的小型講座，蹲在走道低角度仰拍，也能靠廣角拉伸感交出「全場爆滿」的公關照。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs eo-font-mono text-cyan-300/90">
+              <span>站位：舞台前緣 / 制高點</span>
+              <span>注意：人物勿放畫面最邊緣</span>
+            </div>
+          </article>
+
+          <!-- PHASE 02 (桌機：右欄上排；手機：中央疊層) -->
+          <article data-eo-card="1" class="eo-phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-center pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs eo-font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                PHASE 02 — 35mm NETWORKING &amp; BOOTH
+              </span>
+              <span class="text-xs eo-font-mono text-slate-400">FOV 63°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              茶敘敬酒與展攤互動跟拍
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              中場休息的 VIP 交流區與簽到背板前，通道擠滿端著香檳的來賓，根本退不到兩公尺外。掛上 35mm 站在 1.2 公尺社交距離抓拍，既能清楚拍下貴賓交換名片、碰杯大笑的表情，又能把背後的贊助商 Logo 與展攤陳設完整帶入，交代現場故事脈絡。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs eo-font-mono text-emerald-300/90">
+              <span>站位：報到櫃檯 / 展攤走道 (1.2m)</span>
+              <span>敘事平衡：人景五五開</span>
+            </div>
+          </article>
+
+          <!-- PHASE 03 (桌機：左欄下排；手機：中央疊層) -->
+          <article data-eo-card="2" class="eo-phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-1 lg:row-start-2 lg:self-center pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs eo-font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40">
+                PHASE 03 — 85mm KEYNOTE &amp; VIP
+              </span>
+              <span class="text-xs eo-font-mono text-slate-400">FOV 28.5°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              講者眼神特寫與雜物剝離
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              活動會場到處是破壞畫面的礦泉水瓶、麥克風線、逃生指示燈與發呆的工作人員。退到 3 公尺外換上 85mm f/1.4，28.5° 窄視角加上淺景深，能瞬間把講者身後的雜亂背景融化為柔和光斑，精準鎖定主講人比手勢的瞬間與台下 VIP 專注點頭的側臉。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs eo-font-mono text-purple-300/90">
+              <span>站位：舞台側翼 / 第一排走道 (3m)</span>
+              <span>主體分離度：極高</span>
+            </div>
+          </article>
+
+          <!-- PHASE 04 (桌機：右欄下排；手機：中央疊層) -->
+          <article data-eo-card="3" class="eo-phase-card col-start-1 row-start-1 lg:col-span-5 lg:col-start-8 lg:row-start-2 lg:self-end pointer-events-auto p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800/90 lg:opacity-40 lg:scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+            <div class="flex items-center justify-between gap-2 mb-1.5 sm:mb-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs eo-font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                PHASE 04 — 200mm STAGE COMPRESSION
+              </span>
+              <span class="text-xs eo-font-mono text-slate-400">FOV 12°</span>
+            </div>
+            <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">
+              遠距零干擾狙擊與滿版背板壓縮
+            </h2>
+            <p class="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              頒獎典禮或啟動儀式時，你不能衝上台擋住台下長官與轉播攝影機的視線。站在 10 公尺外的中場走道端起 200mm，僅 12° 視角能越過前排黑壓壓的後腦勺，把原本離講者 4 公尺遠的舞台 LED 主視覺硬生生拉近貼滿整個背景，連得獎者眼眶泛淚的瞬間都無所遁形。
+            </p>
+            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs eo-font-mono text-amber-300/90">
+              <span>站位：中後排走道 / 音控台旁 (10m+)</span>
+              <span>空間壓縮感：背板滿版貼合</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 區塊內部底部 HUD 快捷切換導覽列 -->
+    <nav aria-label="焦段階段快捷切換 HUD" class="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[96%] max-w-2xl">
+      <div class="p-1 sm:p-1.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.75)] grid grid-cols-4 gap-1 sm:gap-1.5">
+        <button type="button" data-eo-hud="0" class="eo-hud-btn is-active py-2 px-2 sm:px-3 rounded-xl border border-transparent text-left eo-font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-cyan-400 font-bold">PHASE 01</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">16mm 全場大景</span>
+        </button>
+
+        <button type="button" data-eo-hud="1" class="eo-hud-btn py-2 px-2 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left eo-font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-emerald-400 font-bold">PHASE 02</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">35mm 茶敘互動</span>
+        </button>
+
+        <button type="button" data-eo-hud="2" class="eo-hud-btn py-2 px-2 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left eo-font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-purple-400 font-bold">PHASE 03</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">85mm 講者特寫</span>
+        </button>
+
+        <button type="button" data-eo-hud="3" class="eo-hud-btn py-2 px-2 sm:px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left eo-font-mono flex flex-col items-start">
+          <span class="text-[9px] sm:text-[10px] text-amber-400 font-bold">PHASE 04</span>
+          <span class="text-[11px] sm:text-sm font-bold truncate w-full">200mm 舞台狙擊</span>
+        </button>
+      </div>
+    </nav>
+  </section>
+</div>
+
+<script>
+  (function () {
+    // 動態載入外部相依套件 (若宿主網站尚未載入 Tailwind 或 GSAP)
+    function loadScript(src) {
+      return new Promise(function (resolve, reject) {
+        var existing = document.querySelector('script[src="' + src + '"]');
+        if (existing) {
+          resolve();
+          return;
+        }
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function ensureDependenciesAndInit() {
+      if (!window.tailwind) {
+        await loadScript('https://cdn.tailwindcss.com');
+      }
+      if (!window.gsap) {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js');
+      }
+      if (!window.ScrollTrigger) {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js');
+      }
+      if (!window.ScrollToPlugin) {
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js');
+      }
+      initEventOpticsWidget();
+    }
+
+    function initEventOpticsWidget() {
+      var root = document.getElementById('eo-scrolly-widget');
+      if (!root) return;
+
+      gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+      var phasesData = [
+        {
+          index: 0,
+          focal: 16,
+          fov: 107,
+          dist: '0.5m',
+          compression: 12,
+          lensLabel: '16mm f/2.8 GM // 舞台前緣大景',
+          compressionTag: '場地拉伸: 極高',
+          color: '#22d3ee',
+          glowClass: 'bg-cyan-500/15',
+          bgScale: 0.78,
+          bgBlur: 0,
+          bokehOpacity: 0.12,
+          coneSpread: 52
+        },
+        {
+          index: 1,
+          focal: 35,
+          fov: 63,
+          dist: '1.2m',
+          compression: 38,
+          lensLabel: '35mm f/1.4 GM // 茶敘敬酒跟拍',
+          compressionTag: '人景比例: 臨場自然',
+          color: '#34d399',
+          glowClass: 'bg-emerald-500/15',
+          bgScale: 1.15,
+          bgBlur: 1.5,
+          bokehOpacity: 0.32,
+          coneSpread: 34
+        },
+        {
+          index: 2,
+          focal: 85,
+          fov: 28.5,
+          dist: '2.8m',
+          compression: 74,
+          lensLabel: '85mm f/1.4 GM II // 講者神情特寫',
+          compressionTag: '雜物剝離: 舞台散景',
+          color: '#a855f7',
+          glowClass: 'bg-purple-500/15',
+          bgScale: 1.75,
+          bgBlur: 4.2,
+          bokehOpacity: 0.68,
+          coneSpread: 18
+        },
+        {
+          index: 3,
+          focal: 200,
+          fov: 12,
+          dist: '6.5m',
+          compression: 98,
+          lensLabel: '200mm f/2.8 GM // 音控台遠距狙擊',
+          compressionTag: '背板壓縮: 滿版貼合',
+          color: '#fbbf24',
+          glowClass: 'bg-amber-500/15',
+          bgScale: 2.65,
+          bgBlur: 8.0,
+          bokehOpacity: 0.95,
+          coneSpread: 8
+        }
+      ];
+
+      var activeTrack = root.querySelector('#eo-svg-active-track');
+      var playhead = root.querySelector('#eo-svg-playhead');
+      var playheadCone = root.querySelector('#eo-playhead-fov-cone');
+      var topProgressBar = root.querySelector('#eo-top-progress-bar');
+      var topProgressText = root.querySelector('#eo-top-progress-text');
+      var headerFocalReadout = root.querySelector('#eo-header-focal-readout');
+
+      var vfLensLabel = root.querySelector('#eo-vf-lens-label');
+      var vfFov = root.querySelector('#eo-vf-fov');
+      var vfDist = root.querySelector('#eo-vf-dist');
+      var vfBgLayer = root.querySelector('#eo-vf-bg-layer');
+      var vfBokehGroup = root.querySelector('#eo-vf-bokeh-group');
+      var vfCompressionTag = root.querySelector('#eo-vf-compression-tag');
+      var ambientGlow = root.querySelector('#eo-ambient-glow');
+
+      var metricFocal = root.querySelector('#eo-metric-focal');
+      var metricFov = root.querySelector('#eo-metric-fov');
+      var metricCompression = root.querySelector('#eo-metric-compression');
+      var barFocal = root.querySelector('#eo-bar-focal');
+      var barFov = root.querySelector('#eo-bar-fov');
+      var barCompression = root.querySelector('#eo-bar-compression');
+
+      var svgNodes = root.querySelectorAll('.eo-timeline-node');
+      var phaseCards = root.querySelectorAll('[data-eo-card]');
+      var hudButtons = root.querySelectorAll('[data-eo-hud]');
+
+      var pathLength = activeTrack.getTotalLength();
+      activeTrack.style.strokeDasharray = String(pathLength);
+      activeTrack.style.strokeDashoffset = String(pathLength);
+
+      var nodeTargets = [
+        { x: 400, y: 55 },
+        { x: 260, y: 225 },
+        { x: 540, y: 375 },
+        { x: 400, y: 545 }
+      ];
+
+      var nodeRatios = nodeTargets.map(function (target) {
+        var bestLength = 0;
+        var minDistance = Infinity;
+        var steps = 400;
+        for (var i = 0; i <= steps; i++) {
+          var len = (i / steps) * pathLength;
+          var pt = activeTrack.getPointAtLength(len);
+          var dist = Math.hypot(pt.x - target.x, pt.y - target.y);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestLength = len;
+          }
+        }
+        return bestLength / pathLength;
+      });
+
+      nodeRatios[0] = 0;
+      nodeRatios[3] = 1;
+
+      var currentActiveIndex = -1;
+
+      function interpolateMetrics(progress) {
+        var clamped = Math.max(0, Math.min(1, progress));
+        var segIndex = 0;
+        for (var i = 0; i < nodeRatios.length - 1; i++) {
+          if (clamped >= nodeRatios[i] && clamped <= nodeRatios[i + 1]) {
+            segIndex = i;
+            break;
+          }
+        }
+        var startRatio = nodeRatios[segIndex];
+        var endRatio = nodeRatios[segIndex + 1];
+        var localT = endRatio > startRatio ? (clamped - startRatio) / (endRatio - startRatio) : 0;
+
+        var pA = phasesData[segIndex];
+        var pB = phasesData[segIndex + 1];
+        var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+        return {
+          focal: Math.round(lerp(pA.focal, pB.focal, localT)),
+          fov: lerp(pA.fov, pB.fov, localT).toFixed(1),
+          compression: Math.round(lerp(pA.compression, pB.compression, localT)),
+          bgScale: lerp(pA.bgScale, pB.bgScale, localT),
+          bgBlur: lerp(pA.bgBlur, pB.bgBlur, localT),
+          bokehOpacity: lerp(pA.bokehOpacity, pB.bokehOpacity, localT),
+          coneSpread: lerp(pA.coneSpread, pB.coneSpread, localT)
+        };
+      }
+
+      function setActivePhase(index) {
+        if (currentActiveIndex === index) return;
+        currentActiveIndex = index;
+        var activeData = phasesData[index];
+
+        vfLensLabel.textContent = activeData.lensLabel;
+        vfDist.textContent = activeData.dist;
+        vfCompressionTag.textContent = activeData.compressionTag;
+
+        ambientGlow.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[560px] h-[320px] sm:h-[560px] rounded-full blur-[130px] pointer-events-none transition-colors duration-700 ' + activeData.glowClass;
+
+        svgNodes.forEach(function (node, i) {
+          var outer = node.querySelector('.node-outer');
+          var core = node.querySelector('.node-core');
+          if (i <= index) {
+            node.classList.add('is-active');
+            outer.setAttribute('stroke', phasesData[i].color);
+            core.setAttribute('fill', phasesData[i].color);
+          } else {
+            node.classList.remove('is-active');
+            outer.setAttribute('stroke', '#475569');
+            core.setAttribute('fill', '#94a3b8');
+          }
+        });
+
+        var isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        phaseCards.forEach(function (card) {
+          var cardIdx = parseInt(card.getAttribute('data-eo-card'), 10);
+          if (cardIdx === index) {
+            card.classList.add('is-active');
+            gsap.to(card, {
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              duration: 0.42,
+              ease: 'power3.out',
+              overwrite: 'auto'
+            });
+          } else {
+            card.classList.remove('is-active');
+            gsap.to(card, {
+              opacity: isDesktop ? 0.35 : 0,
+              scale: 0.96,
+              y: isDesktop ? 6 : 12,
+              duration: 0.35,
+              ease: 'power2.out',
+              overwrite: 'auto'
+            });
+          }
+        });
+
+        hudButtons.forEach(function (btn, i) {
+          if (i === index) {
+            btn.classList.add('is-active');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('is-active');
+            btn.classList.add('text-slate-400');
+          }
+        });
+      }
+
+      function updateStageOnScroll(progress) {
+        var clamped = Math.max(0, Math.min(1, progress));
+
+        topProgressBar.style.transform = 'scaleX(' + clamped + ')';
+        var pct = Math.round(clamped * 100);
+        topProgressText.textContent = String(pct).padStart(3, '0') + '%';
+
+        var drawLength = pathLength * clamped;
+        activeTrack.style.strokeDashoffset = String(pathLength - drawLength);
+
+        var currentPt = activeTrack.getPointAtLength(drawLength);
+        playhead.setAttribute('transform', 'translate(' + currentPt.x.toFixed(1) + ', ' + currentPt.y.toFixed(1) + ')');
+
+        var interp = interpolateMetrics(clamped);
+        headerFocalReadout.textContent = interp.focal + 'mm';
+        metricFocal.textContent = interp.focal + 'mm';
+        metricFov.textContent = interp.fov + '°';
+        vfFov.textContent = interp.fov + '°';
+        metricCompression.textContent = interp.compression + '%';
+
+        barFocal.style.width = Math.min(100, (interp.focal / 200) * 100) + '%';
+        barFov.style.width = Math.min(100, (parseFloat(interp.fov) / 115) * 100) + '%';
+        barCompression.style.width = interp.compression + '%';
+
+        vfBgLayer.style.transform = 'scale(' + interp.bgScale.toFixed(3) + ')';
+        vfBgLayer.style.filter = 'blur(' + interp.bgBlur.toFixed(2) + 'px)';
+        vfBokehGroup.setAttribute('opacity', interp.bokehOpacity.toFixed(2));
+
+        var spread = interp.coneSpread.toFixed(1);
+        playheadCone.setAttribute('points', '0,0 -' + spread + ',-55 ' + spread + ',-55');
+
+        var closestIndex = 0;
+        var minDiff = Infinity;
+        nodeRatios.forEach(function (ratio, idx) {
+          var diff = Math.abs(clamped - ratio);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = idx;
+          }
+        });
+        setActivePhase(closestIndex);
+      }
+
+      var mainScrollTrigger = ScrollTrigger.create({
+        trigger: '#eo-pinned-stage',
+        pin: true,
+        start: 'top top',
+        end: '+=3600',
+        scrub: 1.0,
+        onUpdate: function (self) {
+          updateStageOnScroll(self.progress);
+        }
+      });
+
+      setActivePhase(0);
+      updateStageOnScroll(0);
+
+      function scrollToPhase(phaseIndex) {
+        var targetRatio = nodeRatios[phaseIndex] !== undefined ? nodeRatios[phaseIndex] : 0;
+        var targetScrollY = mainScrollTrigger.start + (mainScrollTrigger.end - mainScrollTrigger.start) * targetRatio;
+
+        gsap.to(window, {
+          scrollTo: { y: targetScrollY, autoKill: false },
+          duration: 1.1,
+          ease: 'power3.inOut'
+        });
+      }
+
+      svgNodes.forEach(function (node) {
+        var phaseIndex = parseInt(node.getAttribute('data-eo-phase'), 10);
+        node.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+        node.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scrollToPhase(phaseIndex);
+          }
+        });
+      });
+
+      hudButtons.forEach(function (btn) {
+        var phaseIndex = parseInt(btn.getAttribute('data-eo-hud'), 10);
+        btn.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+      });
+
+      phaseCards.forEach(function (card) {
+        var phaseIndex = parseInt(card.getAttribute('data-eo-card'), 10);
+        card.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+      });
+
+      window.addEventListener('resize', function () {
+        var idx = currentActiveIndex;
+        currentActiveIndex = -1;
+        setActivePhase(idx >= 0 ? idx : 0);
+        ScrollTrigger.refresh();
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', ensureDependenciesAndInit);
+    } else {
+      ensureDependenciesAndInit();
+    }
+  })();
+</script>
