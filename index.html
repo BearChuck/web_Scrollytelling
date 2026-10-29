@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPTICAL TIMELINE // 鏡頭焦段光學時間軸 — Scrollytelling</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: JetBrains Mono & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- GSAP 3, ScrollTrigger & ScrollToPlugin via cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            slate: {
+              950: '#020617',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --neon-cyan: #22d3ee;
+      --neon-emerald: #34d399;
+      --neon-violet: #a855f7;
+      --neon-amber: #fbbf24;
+    }
+
+    body {
+      background-color: #020617;
+      color: #f8fafc;
+      overflow-x: hidden;
+      selection-background-color: #22d3ee;
+      selection-color: #020617;
+    }
+
+    /* 科技微網格背景 */
+    .bg-tech-grid {
+      background-size: 48px 48px;
+      background-image: 
+        linear-gradient(to right, rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+    }
+
+    .bg-radial-vignette {
+      background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.2) 0%, rgba(2, 6, 23, 0.92) 85%);
+    }
+
+    /* SVG 節點與微動效 */
+    .timeline-node {
+      cursor: pointer;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: filter 0.3s ease;
+    }
+
+    .timeline-node .node-outer,
+    .timeline-node .node-core,
+    .timeline-node .node-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease, fill 0.3s ease, opacity 0.3s ease;
+    }
+
+    .timeline-node:hover .node-outer {
+      transform: scale(1.45);
+      stroke: #22d3ee;
+    }
+
+    .timeline-node:hover .node-core {
+      transform: scale(1.3);
+      fill: #ffffff;
+    }
+
+    .timeline-node.is-active .node-outer {
+      transform: scale(1.35);
+      stroke: var(--active-color, #22d3ee);
+    }
+
+    .timeline-node.is-active .node-core {
+      transform: scale(1.2);
+      fill: var(--active-color, #22d3ee);
+    }
+
+    /* 卡片轉場與玻璃擬態 */
+    .phase-card {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .phase-card.is-active {
+      border-color: rgba(34, 211, 238, 0.55);
+      box-shadow: 0 0 35px -5px rgba(34, 211, 238, 0.22), inset 0 0 20px rgba(34, 211, 238, 0.06);
+    }
+
+    /* HUD 按鈕高亮狀態 */
+    .hud-btn {
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .hud-btn.is-active {
+      background: rgba(34, 211, 238, 0.16);
+      border-color: rgba(34, 211, 238, 0.8);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
+    }
+
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #22d3ee;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased selection:bg-cyan-400 selection:text-slate-950">
+
+  <!-- ==================== 頂部固定導覽與即時進度條 ==================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+    <!-- 頂部發光進度條 (使用 scaleX 提升合成層效能) -->
+    <div class="relative w-full h-1 bg-slate-900 overflow-hidden" aria-hidden="true">
+      <div id="top-progress-bar" class="w-full h-full origin-left scale-x-0 bg-gradient-to-r from-cyan-400 via-emerald-400 to-purple-500 shadow-[0_0_12px_#22d3ee]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-3">
+        <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]"></span>
+        <span class="tracking-widest text-slate-200 font-bold">OPTICS_LAB // FOCAL_TIMELINE</span>
+        <span class="hidden md:inline-block text-slate-500">|</span>
+        <span class="hidden md:inline-block text-slate-400">FULL-FRAME 35MM SENSOR SIMULATION</span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2 text-slate-400">
+          <span>ACTIVE FOCAL:</span>
+          <span id="header-focal-readout" class="text-cyan-400 font-bold text-sm">16mm</span>
+        </div>
+        <div class="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-cyan-300 font-semibold">
+          SCROLL <span id="top-progress-text">000%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 1. HERO 引言區塊 ==================== -->
+  <section id="hero-section" class="relative min-h-screen flex flex-col justify-center items-center px-6 pt-20 pb-16 overflow-hidden bg-tech-grid">
+    <!-- 背景光暈裝飾 -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] bg-cyan-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto text-center space-y-6">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 text-cyan-400 text-xs font-mono tracking-widest uppercase shadow-[0_0_20px_rgba(34,211,238,0.12)]">
+        <span>Interactive Optical Scrollytelling</span>
+        <span class="text-slate-600">•</span>
+        <span>16mm — 200mm</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.12] text-white">
+        焦段決定你與世界的<br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-purple-400 drop-shadow-[0_0_25px_rgba(34,211,238,0.25)]">
+          物理距離與空間壓縮
+        </span>
+      </h1>
+
+      <p class="max-w-2xl mx-auto text-slate-300 text-base sm:text-lg leading-relaxed font-normal">
+        焦距差幾毫米，畫面說的就是另一回事。為了把同一個人拍進半身框，16mm 逼你貼到對方鼻尖前 50 公分，把身後的街景拉得深不見底；換上 200mm，你得退到 6 公尺外的馬路對面，背景的霓虹招牌卻像貼在模特兒耳後一樣巨大。
+      </p>
+
+      <!-- 快速光學指標預覽 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 max-w-3xl mx-auto text-left font-mono">
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[11px] text-cyan-400">PHASE 01 // 16mm</div>
+          <div class="text-lg font-bold text-white mt-0.5">107° 超廣視角</div>
+          <div class="text-xs text-slate-400 mt-1">貼身張力・邊緣拉伸</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[11px] text-emerald-400">PHASE 02 // 35mm</div>
+          <div class="text-lg font-bold text-white mt-0.5">63° 街拍敘事</div>
+          <div class="text-xs text-slate-400 mt-1">人帶景・呼吸感距離</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[11px] text-purple-400">PHASE 03 // 85mm</div>
+          <div class="text-lg font-bold text-white mt-0.5">28.5° 人像特寫</div>
+          <div class="text-xs text-slate-400 mt-1">五官立體・奶油散景</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/90">
+          <div class="text-[11px] text-amber-400">PHASE 04 // 200mm</div>
+          <div class="text-lg font-bold text-white mt-0.5">12° 望遠壓縮</div>
+          <div class="text-xs text-slate-400 mt-1">遠景拉近・刀切淺景深</div>
+        </div>
+      </div>
+
+      <div class="pt-6 flex flex-col items-center gap-3">
+        <button id="start-journey-btn" class="group relative inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400/60 text-cyan-300 font-mono text-sm tracking-wider transition-all shadow-[0_0_25px_rgba(34,211,238,0.2)] hover:shadow-[0_0_35px_rgba(34,211,238,0.4)]">
+          <span>啟動光學滾動實驗</span>
+          <svg class="w-4 h-4 transition-transform group-hover:translate-y-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </button>
+        <span class="text-xs font-mono text-slate-500">向下滾動滑輪，或點擊曲線節點與下方 HUD 直接切換焦段</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. PINNED 核心展示視窗區塊 ==================== -->
+  <section id="pinned-stage" class="relative w-full h-screen overflow-hidden bg-slate-950 bg-tech-grid select-none">
+    <div class="absolute inset-0 bg-radial-vignette pointer-events-none"></div>
+
+    <!-- 動態光學氛圍背景光球 -->
+    <div id="ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full bg-cyan-500/15 blur-[140px] pointer-events-none transition-colors duration-700"></div>
+
+    <!-- 主容器：三欄式/絕對定位混合編排 -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full h-full px-4 sm:px-6 pt-16 pb-20 flex flex-col justify-between">
+
+      <!-- 上方狀態列：相機構圖觀景窗模擬 + 即時光學參數面板 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+        <!-- 左側：即時觀景窗模擬器 (Viewfinder Simulation) -->
+        <div class="lg:col-span-7 bg-slate-900/75 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 backdrop-blur-md shadow-lg">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">LIVE VIEWFINDER</span>
+              <span id="vf-lens-label" class="text-slate-200 font-semibold">16mm f/2.8 GM</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span>FOV: <strong id="vf-fov" class="text-cyan-400">107°</strong></span>
+              <span>DIST: <strong id="vf-dist" class="text-emerald-400">0.5m</strong></span>
+            </div>
+          </div>
+
+          <!-- 觀景窗畫面：透視空間與背景建築壓縮視覺模擬 -->
+          <div class="relative w-full h-28 sm:h-36 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
+            <!-- 遠景山脈與高樓群 (隨焦距放大拉近並模糊) -->
+            <div id="vf-bg-layer" class="absolute inset-0 flex items-end justify-center opacity-75 transition-transform duration-100 origin-bottom" style="transform: scale(0.85);">
+              <svg class="w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                <!-- 遠方天際線與霓虹高樓 -->
+                <polygon points="0,160 0,95 65,60 130,105 210,40 290,90 370,30 460,85 540,50 600,90 600,160" fill="#0f172a" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.35" />
+                <!-- 城市建築幾何格線 -->
+                <rect x="85" y="65" width="38" height="95" fill="#1e293b" stroke="#22d3ee" stroke-width="0.8" stroke-opacity="0.4" />
+                <rect x="235" y="45" width="46" height="115" fill="#1e293b" stroke="#a855f7" stroke-width="0.8" stroke-opacity="0.45" />
+                <rect x="405" y="52" width="42" height="108" fill="#1e293b" stroke="#34d399" stroke-width="0.8" stroke-opacity="0.4" />
+                <!-- 散景光點 (Bokeh Circles) -->
+                <g id="vf-bokeh-group" opacity="0.15">
+                  <circle cx="155" cy="65" r="14" fill="#22d3ee" />
+                  <circle cx="330" cy="55" r="18" fill="#a855f7" />
+                  <circle cx="480" cy="70" r="15" fill="#34d399" />
+                  <circle cx="265" cy="85" r="22" fill="#fbbf24" />
+                </g>
+              </svg>
+            </div>
+
+            <!-- 透視格線地面 -->
+            <div id="vf-grid-floor" class="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(to_right,rgba(34,211,238,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.12)_1px,transparent_1px)] bg-[size:24px_12px]" style="transform: perspective(120px) rotateX(60deg);"></div>
+
+            <!-- 主體人物剪影 (保持半身構圖大小相近，展現背景相對放大) -->
+            <div id="vf-subject" class="relative z-10 flex flex-col items-center">
+              <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-cyan-400/90 border-2 border-white shadow-[0_0_15px_#22d3ee]"></div>
+              <div class="w-12 h-12 sm:w-14 sm:h-14 mt-1 rounded-t-2xl bg-slate-200/90 border-2 border-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.35)]"></div>
+            </div>
+
+            <!-- 觀景窗十字準星與對焦框 -->
+            <div class="absolute inset-2 border border-slate-700/60 pointer-events-none flex items-center justify-center">
+              <div class="w-16 h-16 border border-cyan-400/50 rounded-sm relative">
+                <span class="absolute -top-1 -left-1 w-2 h-2 border-t-2 border-l-2 border-cyan-400"></span>
+                <span class="absolute -top-1 -right-1 w-2 h-2 border-t-2 border-r-2 border-cyan-400"></span>
+                <span class="absolute -bottom-1 -left-1 w-2 h-2 border-b-2 border-l-2 border-cyan-400"></span>
+                <span class="absolute -bottom-1 -right-1 w-2 h-2 border-b-2 border-r-2 border-cyan-400"></span>
+              </div>
+              <span class="absolute bottom-1.5 left-2 text-[10px] font-mono text-cyan-300/80">[AF-C] EYE-DETECT LOCK</span>
+              <span id="vf-compression-tag" class="absolute bottom-1.5 right-2 text-[10px] font-mono text-amber-300/90">공간拉伸: 高</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：即時光學遙測儀表板 -->
+        <div class="lg:col-span-5 grid grid-cols-3 gap-2.5 font-mono">
+          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[10px] text-slate-400 uppercase">當前等效焦距</div>
+            <div id="metric-focal" class="text-xl sm:text-2xl font-bold text-cyan-400 mt-1">16mm</div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+              <div id="bar-focal" class="h-full bg-cyan-400 w-[8%]"></div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[10px] text-slate-400 uppercase">對角線視角 (FOV)</div>
+            <div id="metric-fov" class="text-xl sm:text-2xl font-bold text-emerald-400 mt-1">107°</div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+              <div id="bar-fov" class="h-full bg-emerald-400 w-[95%]"></div>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-900/75 border border-slate-800/90 backdrop-blur-md">
+            <div class="text-[10px] text-slate-400 uppercase">背景壓縮指數</div>
+            <div id="metric-compression" class="text-xl sm:text-2xl font-bold text-purple-400 mt-1">12%</div>
+            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden">
+              <div id="bar-compression" class="h-full bg-purple-400 w-[12%]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中央核心舞台：SVG 平滑曲線導軌 + 左右交錯階段說明卡片 -->
+      <div class="relative flex-1 my-2 flex items-center justify-center">
+
+        <!-- 中央自定義平滑 SVG 曲線導軌 -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <svg id="timeline-svg" class="w-full h-full max-w-4xl pointer-events-auto" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <!-- 螢光漸層色 -->
+              <linearGradient id="neon-stroke-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" />
+                <stop offset="35%" stop-color="#34d399" />
+                <stop offset="70%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#fbbf24" />
+              </linearGradient>
+
+              <!-- 螢光發光濾鏡 (Glow Filter) -->
+              <filter id="neon-glow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur1" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <!-- 視野錐體漸層 -->
+              <linearGradient id="fov-cone-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.28" />
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <!-- 光學參考座標軸線 -->
+            <line x1="400" y1="30" x2="400" y2="570" stroke="#1e293b" stroke-dasharray="4 6" stroke-width="1" />
+
+            <!-- 1. 靜態底軌 (Static Base Track) -->
+            <path
+              id="svg-base-track"
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="#1e293b"
+              stroke-width="6"
+              stroke-linecap="round"
+            />
+            <path
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="#334155"
+              stroke-width="1.5"
+              stroke-dasharray="6 8"
+              stroke-linecap="round"
+            />
+
+            <!-- 2. 動態描邊軌 (Active Draw Track with Glow) -->
+            <path
+              id="svg-active-track"
+              d="M 400 55 C 145 140, 145 200, 260 225 C 390 255, 650 280, 540 375 C 440 460, 190 480, 400 545"
+              fill="none"
+              stroke="url(#neon-stroke-grad)"
+              stroke-width="6"
+              stroke-linecap="round"
+              filter="url(#neon-glow)"
+            />
+
+            <!-- 隨曲線移動的即時光學探頭 (Optical Playhead) -->
+            <g id="svg-playhead" transform="translate(400, 55)">
+              <polygon id="playhead-fov-cone" points="0,0 -48,-55 48,-55" fill="url(#fov-cone-grad)" />
+              <circle r="14" fill="rgba(34, 211, 238, 0.18)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3" />
+              <circle r="5" fill="#ffffff" filter="url(#neon-glow)" />
+            </g>
+
+            <!-- 3. 四個可互動 SVG 階段節點 (Hover 放大 + 點擊平滑捲動) -->
+            <!-- Node 01: 16mm (400, 55) -->
+            <g class="timeline-node is-active" data-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="跳轉至 Phase 01: 16mm 超廣角">
+              <circle class="node-pulse" cx="400" cy="55" r="24" fill="rgba(34, 211, 238, 0.12)" />
+              <circle class="node-outer" cx="400" cy="55" r="13" fill="#020617" stroke="#22d3ee" stroke-width="3" filter="url(#neon-glow)" />
+              <circle class="node-core" cx="400" cy="55" r="5.5" fill="#22d3ee" />
+              <text x="424" y="60" fill="#22d3ee" font-family="JetBrains Mono" font-size="12" font-weight="700">01 // 16mm</text>
+            </g>
+
+            <!-- Node 02: 35mm (260, 225) -->
+            <g class="timeline-node" data-phase="1" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="跳轉至 Phase 02: 35mm 人文廣角">
+              <circle class="node-pulse" cx="260" cy="225" r="24" fill="rgba(52, 211, 153, 0.10)" />
+              <circle class="node-outer" cx="260" cy="225" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="260" cy="225" r="5.5" fill="#94a3b8" />
+              <text x="155" y="230" fill="#34d399" font-family="JetBrains Mono" font-size="12" font-weight="700">02 // 35mm</text>
+            </g>
+
+            <!-- Node 03: 85mm (540, 375) -->
+            <g class="timeline-node" data-phase="2" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="跳轉至 Phase 03: 85mm 中焦人像">
+              <circle class="node-pulse" cx="540" cy="375" r="24" fill="rgba(168, 85, 247, 0.10)" />
+              <circle class="node-outer" cx="540" cy="375" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="540" cy="375" r="5.5" fill="#94a3b8" />
+              <text x="564" y="380" fill="#c084fc" font-family="JetBrains Mono" font-size="12" font-weight="700">03 // 85mm</text>
+            </g>
+
+            <!-- Node 04: 200mm (400, 545) -->
+            <g class="timeline-node" data-phase="3" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="跳轉至 Phase 04: 200mm 望遠長焦">
+              <circle class="node-pulse" cx="400" cy="545" r="24" fill="rgba(251, 191, 36, 0.10)" />
+              <circle class="node-outer" cx="400" cy="545" r="13" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="400" cy="545" r="5.5" fill="#94a3b8" />
+              <text x="424" y="550" fill="#fbbf24" font-family="JetBrains Mono" font-size="12" font-weight="700">04 // 200mm</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 階段卡片顯示區 (對應 4 個 Phase) -->
+        <div class="relative z-20 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-center pointer-events-none">
+
+          <!-- 左側卡片槽：放置 Phase 01 & Phase 03 -->
+          <div class="lg:col-span-5 flex flex-col gap-6">
+            <!-- PHASE 01 -->
+            <article id="phase-card-0" data-phase-card="0" class="phase-card is-active pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/80 border border-cyan-500/50 cursor-pointer" title="點擊捲動鎖定至此階段">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                  PHASE 01 — 16mm ULTRA-WIDE
+                </span>
+                <span class="text-xs font-mono text-slate-400">FOV 107°</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                誇張透視與空間張力
+              </h2>
+              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
+                站在台北西門町天橋上往下拍，16mm 能把整條斑馬線、兩側霓虹招牌跟頭頂的雲層全塞進同一個畫面。離鏡頭只有 40 公分的欄杆會瞬間放大，遠處的公車則縮小成火柴盒，步伐再小都像在衝刺。
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-cyan-300/90">
+                <span>建議工作距離：0.3m – 0.8m</span>
+                <span>邊緣拉伸：極高</span>
+              </div>
+            </article>
+
+            <!-- PHASE 03 -->
+            <article id="phase-card-2" data-phase-card="2" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40">
+                  PHASE 03 — 85mm PORTRAIT PRIME
+                </span>
+                <span class="text-xs font-mono text-slate-400">FOV 28.5°</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                臉部零變形與奶油散景剝離
+              </h2>
+              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
+                退後到 2.5 公尺外，廣角常見的大鼻子變形徹底消失，鼻樑到耳廓的比例最順眼。當光圈開到 f/1.4，身後雜亂的鐵皮屋與電線桿全化為圓潤光斑，視線只會停在模特兒的睫毛與眼神光上。
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-purple-300/90">
+                <span>建議工作距離：2.0m – 3.5m</span>
+                <span>主體分離度：高</span>
+              </div>
+            </article>
+          </div>
+
+          <!-- 中央留白給 SVG 曲線 -->
+          <div class="hidden lg:block lg:col-span-2"></div>
+
+          <!-- 右側卡片槽：放置 Phase 02 & Phase 04 -->
+          <div class="lg:col-span-5 flex flex-col gap-6">
+            <!-- PHASE 02 -->
+            <article id="phase-card-1" data-phase-card="1" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                  PHASE 02 — 35mm STREET DOCUMENTARY
+                </span>
+                <span class="text-xs font-mono text-slate-400">FOV 63°</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                雙眼自然視野與環境敘事
+              </h2>
+              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
+                走進大稻埕的午後咖啡館，隔著一張小圓桌（約 1.2 公尺）舉起 35mm。你拍得到朋友手裡冒煙的手沖壺，也能把窗外的紅磚騎樓收進背景。人物跟環境五五開，沒有廣角的侵略感，像坐在對面聊天。
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-emerald-300/90">
+                <span>建議工作距離：1.0m – 1.8m</span>
+                <span>敘事平衡：極佳</span>
+              </div>
+            </article>
+
+            <!-- PHASE 04 -->
+            <article id="phase-card-3" data-phase-card="3" class="phase-card pointer-events-auto p-5 sm:p-6 rounded-2xl bg-slate-900/70 border border-slate-800/90 opacity-40 scale-95 cursor-pointer" title="點擊捲動鎖定至此階段">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                  PHASE 04 — 200mm TELEPHOTO COMPRESSION
+                </span>
+                <span class="text-xs font-mono text-slate-400">FOV 12°</span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                劇烈空間壓縮與平面化構圖
+              </h2>
+              <p class="mt-2.5 text-sm text-slate-300 leading-relaxed">
+                站在仁愛路圓環端端起 200mm，兩公里外的台北 101 瞬間逼近到行人肩膀後方，整排路樹與車流像疊紙片一樣擠在同一平面。僅 12 度的窄視角能直接切掉兩旁雜物，把遠方夕陽壓成前景人物背後的巨大火球。
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-amber-300/90">
+                <span>建議工作距離：6.0m – 15m+</span>
+                <span>空間壓縮感：極致</span>
+              </div>
+            </article>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 底部 HUD 快捷切換導覽列 ==================== -->
+    <nav aria-label="焦段階段快捷切換 HUD" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-2xl">
+      <div class="p-1.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.75)] flex items-center justify-between gap-1.5">
+        <button type="button" data-hud-btn="0" class="hud-btn is-active flex-1 py-2.5 px-3 rounded-xl border border-transparent text-left font-mono flex flex-col items-start">
+          <span class="text-[10px] text-cyan-400 font-bold">PHASE 01</span>
+          <span class="text-xs sm:text-sm font-bold">16mm 超廣角</span>
+        </button>
+
+        <button type="button" data-hud-btn="1" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[10px] text-emerald-400 font-bold">PHASE 02</span>
+          <span class="text-xs sm:text-sm font-bold">35mm 人文街拍</span>
+        </button>
+
+        <button type="button" data-hud-btn="2" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[10px] text-purple-400 font-bold">PHASE 03</span>
+          <span class="text-xs sm:text-sm font-bold">85mm 人像特寫</span>
+        </button>
+
+        <button type="button" data-hud-btn="3" class="hud-btn flex-1 py-2.5 px-3 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-left font-mono flex flex-col items-start">
+          <span class="text-[10px] text-amber-400 font-bold">PHASE 04</span>
+          <span class="text-xs sm:text-sm font-bold">200mm 望遠壓縮</span>
+        </button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ==================== 3. 後續結論與光學實測數據區塊 ==================== -->
+  <section id="conclusion-section" class="relative z-20 py-28 px-6 bg-slate-950 border-t border-slate-800/80">
+    <div class="max-w-6xl mx-auto space-y-16">
+
+      <!-- 結論標題與核心洞察 -->
+      <div class="max-w-3xl space-y-4">
+        <div class="inline-flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-widest">
+          <span>OPTICAL DATA SUMMARY // 實測光學數據對照</span>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          改變透視關係的從來是你的雙腳，焦段負責決定取景框的裁切比例。
+        </h2>
+        <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+          在光學物理上，只要拍攝者與被攝者的站位不變，無論換上 16mm 或 200mm，前景與背景的透視比例完全相同。之所以產生「廣角誇張、長焦壓縮」的強烈反差，是因為我們為了讓人物在畫面裡維持同樣的半身大小，被迫往前走近 50 公分，或是往後退開 6 公尺。
+        </p>
+      </div>
+
+      <!-- 數據對照矩陣表格 -->
+      <div class="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-md shadow-2xl">
+        <table class="w-full text-left border-collapse font-mono text-sm">
+          <thead>
+            <tr class="border-b border-slate-800 bg-slate-900/90 text-slate-400 text-xs uppercase">
+              <th class="py-4 px-5">階段 / 焦段</th>
+              <th class="py-4 px-5">對角線視角 (FOV)</th>
+              <th class="py-4 px-5">半身人像對焦距離</th>
+              <th class="py-4 px-5">f/2.8 景深範圍 (DoF)</th>
+              <th class="py-4 px-5">空間視覺特徵</th>
+              <th class="py-4 px-5">實戰代表題材</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800/70 text-slate-200">
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-5 font-bold text-cyan-400">Phase 01 // 16mm</td>
+              <td class="py-4 px-5">107.0°</td>
+              <td class="py-4 px-5">0.55 m</td>
+              <td class="py-4 px-5">0.38 m (深景深)</td>
+              <td class="py-4 px-5">近大遠小極劇烈、邊緣放射拉伸</td>
+              <td class="py-4 px-5 font-sans text-slate-300">建築室內、星野銀河、滑板極限跟拍</td>
+            </tr>
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-5 font-bold text-emerald-400">Phase 02 // 35mm</td>
+              <td class="py-4 px-5">63.4°</td>
+              <td class="py-4 px-5">1.20 m</td>
+              <td class="py-4 px-5">0.26 m (中景深)</td>
+              <td class="py-4 px-5">貼近人眼立體感、主體與環境均衡</td>
+              <td class="py-4 px-5 font-sans text-slate-300">街頭紀實、婚禮現場、旅遊隨拍</td>
+            </tr>
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-5 font-bold text-purple-400">Phase 03 // 85mm</td>
+              <td class="py-4 px-5">28.5°</td>
+              <td class="py-4 px-5">2.80 m</td>
+              <td class="py-4 px-5">0.14 m (淺景深)</td>
+              <td class="py-4 px-5">五官比例自然、背景柔化剝離</td>
+              <td class="py-4 px-5 font-sans text-slate-300">商業肖像、情緒特寫、舞台局部</td>
+            </tr>
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-5 font-bold text-amber-400">Phase 04 // 200mm</td>
+              <td class="py-4 px-5">12.3°</td>
+              <td class="py-4 px-5">6.50 m</td>
+              <td class="py-4 px-5">0.08 m (極淺景深)</td>
+              <td class="py-4 px-5">前後景距離歸零、色塊平面化</td>
+              <td class="py-4 px-5 font-sans text-slate-300">室內運動、飛羽生態、城市長焦壓縮</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3 個實戰光學結論卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+          <div class="text-xs font-mono text-cyan-400">CONCLUSION 01 // 距離與親密感</div>
+          <h3 class="text-xl font-bold text-white">想拍出臨場呼吸感，選 35mm 走進現場</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            當你站在距離被攝者 1.2 公尺的社交距離內，對方的眼神交流與肢體動作最自然；畫面同時保留當下的餐桌、街道與光影線索。
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+          <div class="text-xs font-mono text-purple-400">CONCLUSION 02 // 雜亂背景救星</div>
+          <h3 class="text-xl font-bold text-white">台灣街頭招牌太亂？換 85mm 以上的窄視角</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            與其靠大光圈硬把背景糊掉，不如退後兩步換上 85mm 或 200mm。視角從 63° 縮窄到 12°，只要稍微移動半步，就能把背後的垃圾桶與電箱徹底移出取景框。
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+          <div class="text-xs font-mono text-amber-400">CONCLUSION 03 // 視覺重量控制</div>
+          <h3 class="text-xl font-bold text-white">要氣勢用 16mm 貼近，要壓迫感用 200mm 遠攝</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            廣角仰拍能讓一棟三層樓老宅看起來像摩天大樓；而長焦遠攝則能讓遠處的山嵐或夕陽塞滿整個取景窗，產生無法逃離的宿命感。
+          </p>
+        </div>
+      </div>
+
+      <!-- 返回頂部與重新體驗 -->
+      <div class="pt-8 pb-12 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-slate-500">
+        <div>OPTICS_LAB // SCROLLYTELLING VECTOR TIMELINE • GSAP 3 + SCROLLTRIGGER</div>
+        <button id="back-to-top-btn" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-slate-800 transition-colors">
+          ↑ 返回頂部重新捲動
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== 核心互動與 GSAP 動效腳本 ==================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+      // 4 個焦段階段完整光學資料
+      const phasesData = [
+        {
+          index: 0,
+          focal: 16,
+          fov: 107,
+          dist: '0.5m',
+          compression: 12,
+          lensLabel: '16mm f/2.8 GM Ultra-Wide',
+          compressionTag: '空間拉伸: 極高',
+          color: '#22d3ee',
+          glowClass: 'bg-cyan-500/15',
+          bgScale: 0.78,
+          bgBlur: 0,
+          bokehOpacity: 0.12,
+          coneSpread: 52,
+          progressRatio: 0.0
+        },
+        {
+          index: 1,
+          focal: 35,
+          fov: 63,
+          dist: '1.2m',
+          compression: 38,
+          lensLabel: '35mm f/1.4 GM Street Prime',
+          compressionTag: '透視平衡: 自然',
+          color: '#34d399',
+          glowClass: 'bg-emerald-500/15',
+          bgScale: 1.15,
+          bgBlur: 1.5,
+          bokehOpacity: 0.32,
+          coneSpread: 34,
+          progressRatio: 0.3333
+        },
+        {
+          index: 2,
+          focal: 85,
+          fov: 28.5,
+          dist: '2.8m',
+          compression: 74,
+          lensLabel: '85mm f/1.4 GM II Portrait',
+          compressionTag: '散景剝離: 奶油級',
+          color: '#a855f7',
+          glowClass: 'bg-purple-500/15',
+          bgScale: 1.75,
+          bgBlur: 4.2,
+          bokehOpacity: 0.68,
+          coneSpread: 18,
+          progressRatio: 0.6666
+        },
+        {
+          index: 3,
+          focal: 200,
+          fov: 12,
+          dist: '6.5m',
+          compression: 98,
+          lensLabel: '200mm f/2.8 Telephoto Master',
+          compressionTag: '背景壓縮: 極致平面化',
+          color: '#fbbf24',
+          glowClass: 'bg-amber-500/15',
+          bgScale: 2.65,
+          bgBlur: 8.0,
+          bokehOpacity: 0.95,
+          coneSpread: 8,
+          progressRatio: 1.0
+        }
+      ];
+
+      // DOM 元素參照
+      const activeTrack = document.getElementById('svg-active-track');
+      const playhead = document.getElementById('svg-playhead');
+      const playheadCone = document.getElementById('playhead-fov-cone');
+      const topProgressBar = document.getElementById('top-progress-bar');
+      const topProgressText = document.getElementById('top-progress-text');
+      const headerFocalReadout = document.getElementById('header-focal-readout');
+
+      const vfLensLabel = document.getElementById('vf-lens-label');
+      const vfFov = document.getElementById('vf-fov');
+      const vfDist = document.getElementById('vf-dist');
+      const vfBgLayer = document.getElementById('vf-bg-layer');
+      const vfBokehGroup = document.getElementById('vf-bokeh-group');
+      const vfCompressionTag = document.getElementById('vf-compression-tag');
+      const ambientGlow = document.getElementById('ambient-glow');
+
+      const metricFocal = document.getElementById('metric-focal');
+      const metricFov = document.getElementById('metric-fov');
+      const metricCompression = document.getElementById('metric-compression');
+      const barFocal = document.getElementById('bar-focal');
+      const barFov = document.getElementById('bar-fov');
+      const barCompression = document.getElementById('bar-compression');
+
+      const svgNodes = document.querySelectorAll('.timeline-node');
+      const phaseCards = document.querySelectorAll('[data-phase-card]');
+      const hudButtons = document.querySelectorAll('[data-hud-btn]');
+
+      // 1. 初始化 SVG Path 總長度與 strokeDasharray / strokeDashoffset
+      const pathLength = activeTrack.getTotalLength();
+      activeTrack.style.strokeDasharray = `${pathLength}`;
+      activeTrack.style.strokeDashoffset = `${pathLength}`;
+
+      // 計算每個節點在 SVG 路徑上的精準進度比例
+      const nodeTargets = [
+        { x: 400, y: 55 },
+        { x: 260, y: 225 },
+        { x: 540, y: 375 },
+        { x: 400, y: 545 }
+      ];
+
+      // 透過採樣找出四個節點在曲線上對應的精確長度比例 (0 ~ 1)
+      const nodeRatios = nodeTargets.map((target) => {
+        let bestLength = 0;
+        let minDistance = Infinity;
+        const steps = 400;
+        for (let i = 0; i <= steps; i++) {
+          const len = (i / steps) * pathLength;
+          const pt = activeTrack.getPointAtLength(len);
+          const dist = Math.hypot(pt.x - target.x, pt.y - target.y);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestLength = len;
+          }
+        }
+        return bestLength / pathLength;
+      });
+
+      nodeRatios[0] = 0;
+      nodeRatios[3] = 1;
+
+      let currentActiveIndex = -1;
+
+      // 根據線性插值計算當前進度的連續光學數值
+      function interpolateMetrics(progress) {
+        const clamped = Math.max(0, Math.min(1, progress));
+        // 找出落在哪兩個節點區間
+        let segIndex = 0;
+        for (let i = 0; i < nodeRatios.length - 1; i++) {
+          if (clamped >= nodeRatios[i] && clamped <= nodeRatios[i + 1]) {
+            segIndex = i;
+            break;
+          }
+        }
+        const startRatio = nodeRatios[segIndex];
+        const endRatio = nodeRatios[segIndex + 1];
+        const localT = endRatio > startRatio ? (clamped - startRatio) / (endRatio - startRatio) : 0;
+
+        const pA = phasesData[segIndex];
+        const pB = phasesData[segIndex + 1];
+
+        const lerp = (a, b, t) => a + (b - a) * t;
+
+        return {
+          focal: Math.round(lerp(pA.focal, pB.focal, localT)),
+          fov: lerp(pA.fov, pB.fov, localT).toFixed(1),
+          compression: Math.round(lerp(pA.compression, pB.compression, localT)),
+          bgScale: lerp(pA.bgScale, pB.bgScale, localT),
+          bgBlur: lerp(pA.bgBlur, pB.bgBlur, localT),
+          bokehOpacity: lerp(pA.bokehOpacity, pB.bokehOpacity, localT),
+          coneSpread: lerp(pA.coneSpread, pB.coneSpread, localT)
+        };
+      }
+
+      // 切換當前高亮的階段 (SVG 節點 + 階段說明卡片 + HUD 快捷按鈕)
+      function setActivePhase(index) {
+        if (currentActiveIndex === index) return;
+        currentActiveIndex = index;
+        const activeData = phasesData[index];
+
+        // 更新觀景窗文字標籤
+        vfLensLabel.textContent = activeData.lensLabel;
+        vfDist.textContent = activeData.dist;
+        vfCompressionTag.textContent = activeData.compressionTag;
+
+        // 更新環境光球顏色
+        ambientGlow.className = `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] rounded-full blur-[140px] pointer-events-none transition-colors duration-700 ${activeData.glowClass}`;
+
+        // 1. 同步 SVG 節點狀態
+        svgNodes.forEach((node, i) => {
+          const outer = node.querySelector('.node-outer');
+          const core = node.querySelector('.node-core');
+          if (i <= index) {
+            node.classList.add('is-active');
+            outer.setAttribute('stroke', phasesData[i].color);
+            core.setAttribute('fill', phasesData[i].color);
+          } else {
+            node.classList.remove('is-active');
+            outer.setAttribute('stroke', '#475569');
+            core.setAttribute('fill', '#94a3b8');
+          }
+        });
+
+        // 2. 同步階段卡片進退場與高亮動效
+        phaseCards.forEach((card, i) => {
+          if (i === index) {
+            card.classList.add('is-active');
+            gsap.to(card, {
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              duration: 0.45,
+              ease: 'power3.out',
+              overwrite: 'auto'
+            });
+          } else {
+            card.classList.remove('is-active');
+            gsap.to(card, {
+              opacity: 0.35,
+              scale: 0.96,
+              y: 6,
+              duration: 0.4,
+              ease: 'power2.out',
+              overwrite: 'auto'
+            });
+          }
+        });
+
+        // 3. 同步底部 HUD 快捷按鈕高亮
+        hudButtons.forEach((btn, i) => {
+          if (i === index) {
+            btn.classList.add('is-active');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('is-active');
+            btn.classList.add('text-slate-400');
+          }
+        });
+      }
+
+      // 根據滾動進度 (0 ~ 1) 更新所有視覺與數據
+      function updateStageOnScroll(progress) {
+        const clamped = Math.max(0, Math.min(1, progress));
+
+        // A. 更新頂部進度條與百分比文字
+        topProgressBar.style.transform = `scaleX(${clamped})`;
+        const pct = Math.round(clamped * 100);
+        topProgressText.textContent = `${String(pct).padStart(3, '0')}%`;
+
+        // B. 更新 SVG 動態描邊軌 (strokeDashoffset)
+        const drawLength = pathLength * clamped;
+        activeTrack.style.strokeDashoffset = `${pathLength - drawLength}`;
+
+        // C. 更新 SVG 光學探頭座標與視野錐角度
+        const currentPt = activeTrack.getPointAtLength(drawLength);
+        playhead.setAttribute('transform', `translate(${currentPt.x.toFixed(1)}, ${currentPt.y.toFixed(1)})`);
+
+        // D. 插值計算連續光學參數並反映在儀表與觀景窗
+        const interp = interpolateMetrics(clamped);
+        headerFocalReadout.textContent = `${interp.focal}mm`;
+        metricFocal.textContent = `${interp.focal}mm`;
+        metricFov.textContent = `${interp.fov}°`;
+         vfFov.textContent = `${interp.fov}°`;
+        metricCompression.textContent = `${interp.compression}%`;
+
+        barFocal.style.width = `${Math.min(100, (interp.focal / 200) * 100)}%`;
+        barFov.style.width = `${Math.min(100, (parseFloat(interp.fov) / 115) * 100)}%`;
+        barCompression.style.width = `${interp.compression}%`;
+
+        // 更新觀景窗背景透視壓縮與散景模糊
+        vfBgLayer.style.transform = `scale(${interp.bgScale.toFixed(3)})`;
+        vfBgLayer.style.filter = `blur(${interp.bgBlur.toFixed(2)}px)`;
+        vfBokehGroup.setAttribute('opacity', interp.bokehOpacity.toFixed(2));
+
+        // 更新探頭視野錐寬度
+        const spread = interp.coneSpread.toFixed(1);
+        playheadCone.setAttribute('points', `0,0 -${spread},-55 ${spread},-55`);
+
+        // E. 判斷當前最接近哪個階段節點
+        let closestIndex = 0;
+        let minDiff = Infinity;
+        nodeRatios.forEach((ratio, idx) => {
+          const diff = Math.abs(clamped - ratio);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = idx;
+          }
+        });
+        setActivePhase(closestIndex);
+      }
+
+      // 建立 Pinned 核心區塊的 ScrollTrigger (scrub: 1.0 提供平滑物理阻尼)
+      const mainScrollTrigger = ScrollTrigger.create({
+        trigger: '#pinned-stage',
+        pin: true,
+        start: 'top top',
+        end: '+=3600',
+        scrub: 1.0,
+        onUpdate: (self) => {
+          updateStageOnScroll(self.progress);
+        }
+      });
+
+      // 初始化第一次畫面狀態
+      setActivePhase(0);
+      updateStageOnScroll(0);
+
+      // ==================== 雙向聯動：點擊節點、卡片或 HUD 平滑捲動至對應高度 ====================
+      function scrollToPhase(phaseIndex) {
+        const targetRatio = nodeRatios[phaseIndex] ?? 0;
+        const targetScrollY = mainScrollTrigger.start + (mainScrollTrigger.end - mainScrollTrigger.start) * targetRatio;
+
+        gsap.to(window, {
+          scrollTo: { y: targetScrollY, autoKill: false },
+          duration: 1.1,
+          ease: 'power3.inOut'
+        });
+      }
+
+      // 綁定 SVG 節點點擊與鍵盤 Enter/Space
+      svgNodes.forEach((node) => {
+        const phaseIndex = parseInt(node.getAttribute('data-phase'), 10);
+        node.addEventListener('click', () => scrollToPhase(phaseIndex));
+        node.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scrollToPhase(phaseIndex);
+          }
+        });
+      });
+
+      // 綁定 HUD 快捷切換按鈕
+      hudButtons.forEach((btn) => {
+        const phaseIndex = parseInt(btn.getAttribute('data-hud-btn'), 10);
+        btn.addEventListener('click', () => scrollToPhase(phaseIndex));
+      });
+
+      // 綁定階段說明卡片點擊也可捲動對齊
+      phaseCards.forEach((card) => {
+        const phaseIndex = parseInt(card.getAttribute('data-phase-card'), 10);
+        card.addEventListener('click', () => scrollToPhase(phaseIndex));
+      });
+
+      // Hero 啟動按鈕與返回頂部按鈕
+      document.getElementById('start-journey-btn').addEventListener('click', () => {
+        scrollToPhase(0);
+      });
+
+      document.getElementById('back-to-top-btn').addEventListener('click', () => {
+        gsap.to(window, {
+          scrollTo: { y: 0, autoKill: false },
+          duration: 1.2,
+          ease: 'power3.inOut'
+        });
+      });
+
+      // 視窗尺寸改變時重新計算 ScrollTrigger
+      window.addEventListener('resize', () => {
+        ScrollTrigger.refresh();
+      });
+    });
+  </script>
+</body>
+</html>
+
