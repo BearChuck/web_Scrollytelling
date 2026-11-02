@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRASS ACOUSTICS // 銅管小號發聲物理與聲學共鳴 — Scrollytelling 滾動向量時間軸</title>
+
+  <!-- Google Fonts: Inter, Noto Sans TC, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- GSAP 3 Core, ScrollTrigger, ScrollToPlugin (cdnjs) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+  <style>
+    :root {
+      --neon-amber: #fbbf24;
+      --neon-cyan: #22d3ee;
+      --neon-emerald: #34d399;
+      --neon-violet: #a855f7;
+      --neon-rose: #f43f5e;
+      --neon-blue: #38bdf8;
+    }
+
+    body {
+      background-color: #020617;
+      color: #f8fafc;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 科技聲學網格背景 */
+    .bg-acoustic-grid {
+      background-size: 48px 48px;
+      background-image:
+        linear-gradient(to right, rgba(251, 191, 36, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+    }
+
+    .bg-radial-vignette {
+      background: radial-gradient(circle at 50% 50%, transparent 15%, rgba(2, 6, 23, 0.9) 100%);
+    }
+
+    /* 柔和微透毛玻璃面板 */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    }
+
+    /* 圖卡同格疊層容器：讓高度依內容自然撐開，邊界永遠貼合不裁切 */
+    .card-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      position: relative;
+      width: 100%;
+    }
+
+    /* 階段說明圖卡：明確定義舒適內距 (padding)，確保文字與邊框擁有充裕呼吸空間 */
+    .phase-card {
+      grid-column: 1 / -1;
+      grid-row: 1 / -1;
+      width: 100%;
+      padding: 1.35rem 1.5rem;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+      cursor: pointer;
+    }
+
+    @media (min-width: 640px) {
+      .phase-card {
+        padding: 1.6rem 1.85rem;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .phase-card {
+        padding: 1.85rem 2.15rem;
+      }
+    }
+
+    /* 6 個階段專屬光學聲學邊界與環境光暈 */
+    .phase-card[data-phase-card="0"] {
+      border: 1.5px solid rgba(34, 211, 238, 0.45);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(34, 211, 238, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    }
+    .phase-card[data-phase-card="1"] {
+      border: 1.5px solid rgba(244, 63, 94, 0.45);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(244, 63, 94, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    }
+    .phase-card[data-phase-card="2"] {
+      border: 1.5px solid rgba(251, 191, 36, 0.45);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(251, 191, 36, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    }
+    .phase-card[data-phase-card="3"] {
+      border: 1.5px solid rgba(52, 211, 153, 0.45);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(52, 211, 153, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    }
+    .phase-card[data-phase-card="4"] {
+      border: 1.5px solid rgba(168, 85, 247, 0.45);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(168, 85, 247, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    }
+    .phase-card[data-phase-card="5"] {
+      border: 1.5px solid rgba(245, 158, 11, 0.55);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 36px -4px rgba(251, 191, 36, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .phase-card.is-active {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      z-index: 10;
+    }
+
+    .phase-card:not(.is-active) {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transform: translateY(14px) scale(0.97) !important;
+      z-index: 0;
+    }
+
+    /* SVG 節點互動回饋 */
+    .timeline-node {
+      cursor: pointer;
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: filter 0.3s ease;
+    }
+
+    .timeline-node .node-outer,
+    .timeline-node .node-core,
+    .timeline-node .node-pulse {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease, fill 0.3s ease;
+    }
+
+    .timeline-node:hover .node-outer {
+      transform: scale(1.42);
+      stroke: #fbbf24;
+    }
+
+    .timeline-node:hover .node-core {
+      transform: scale(1.3);
+      fill: #ffffff;
+    }
+
+    .timeline-node.is-active .node-outer {
+      transform: scale(1.35);
+      stroke: var(--active-color, #fbbf24);
+    }
+
+    .timeline-node.is-active .node-core {
+      transform: scale(1.2);
+      fill: var(--active-color, #fbbf24);
+    }
+
+    /* 底部 HUD 快捷按鈕 */
+    .hud-btn {
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+    }
+
+    .hud-btn.is-active {
+      background: rgba(251, 191, 36, 0.18);
+      border-color: rgba(251, 191, 36, 0.85);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.28);
+    }
+
+    /* 小號解剖結構部件高亮過渡 */
+    .trumpet-part {
+      transition: all 0.4s ease;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans selection:bg-amber-400 selection:text-slate-950">
+
+  <!-- ==================== 頂部固定導覽與即時進度條 ==================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+    <!-- 頂部進度條 (即時反映滾動百分比) -->
+    <div class="relative w-full h-1 bg-slate-900 overflow-hidden">
+      <div id="top-progress-bar" class="w-full h-full origin-left scale-x-0 bg-gradient-to-r from-cyan-400 via-amber-400 to-purple-500 shadow-[0_0_12px_#fbbf24]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between text-xs font-mono">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]"></span>
+        <span class="text-slate-200 font-bold tracking-wider">BRASS_ACOUSTICS // 銅管小號發聲科學</span>
+        <span class="hidden md:inline-block px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[11px]">
+          Bb TRUMPET RESONANCE LAB
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="hidden sm:flex items-center gap-2 text-slate-400">
+          <span>ACTIVE HARMONIC:</span>
+          <span id="header-freq-readout" class="text-amber-400 font-bold">233 Hz (Bb3)</span>
+        </div>
+        <div class="px-2.5 py-1 rounded bg-slate-900 border border-slate-700/80 text-amber-300 font-semibold">
+          PROGRESS: <span id="top-progress-text">000%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== 1. HERO 引言與 AI 導演提示詞區塊 ==================== -->
+  <section id="hero-section" class="relative min-h-screen pt-20 pb-14 flex flex-col items-center justify-center overflow-hidden bg-acoustic-grid">
+    <div class="absolute inset-0 bg-radial-vignette pointer-events-none"></div>
+
+    <!-- 背景發光光球 -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-amber-500/10 blur-[130px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-cyan-500/10 blur-[130px] pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full">
+      <!-- 頂部標籤 -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-5">
+        <span class="px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-mono tracking-widest uppercase">
+          ACOUSTIC PHYSICS ✕ SCROLLYTELLING
+        </span>
+        <span class="px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-mono">
+          6 PHASES // 氣流 ➔ 唇振 ➔ 號嘴 ➔ 駐波 ➔ 活塞 ➔ 號口綻放
+        </span>
+      </div>
+
+      <!-- 主標題 (不使用 H1/H2/H3 標籤，採用結構化樣式 div) -->
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15]">
+          銅管小號如何發出聲音？
+          <span class="block mt-2 bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-400 bg-clip-text text-transparent">
+            從一口氣息到璀璨泛音的聲學旅程
+          </span>
+        </div>
+
+        <p class="mt-5 text-sm sm:text-base lg:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          小號本身並沒有簧片或琴弦，真正的發聲源來自演奏者微米級開合的<span class="text-amber-300 font-semibold">雙唇振源（Lip Reed）</span>。當高壓氣流化為聲波脈衝，進入 148 公分黃銅管體激發駐波共鳴，最終由指數型號口綻放穿透全場的黃金音色。
+        </p>
+      </div>
+
+      <!-- 課堂作業步驟二：5 秒 Hero 區塊「AI 導演提示詞」拆解面板 -->
+      <div class="mt-8 max-w-4xl mx-auto glass-panel rounded-3xl p-5 sm:p-6 border border-amber-400/30">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3.5 mb-4 border-b border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/40 font-mono text-xs font-bold">
+              🎬 AI DIRECTOR PROMPT // 5秒首頁背景生成公式
+            </span>
+            <span class="text-xs text-slate-400 font-mono hidden sm:inline">Shot on Arri Alexa // 4K 24fps</span>
+          </div>
+          <button id="copy-prompt-btn" type="button" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-amber-400/20 border border-white/15 hover:border-amber-400/50 text-xs font-mono text-amber-300 transition cursor-pointer">
+            📋 複製導演提示詞
+          </button>
+        </div>
+
+        <!-- 英文完整導演提示詞 -->
+        <div id="director-prompt-text" class="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 font-mono text-xs sm:text-sm text-amber-100/95 leading-relaxed">
+          Slow 85mm macro tracking shot at eye level. A master trumpeter pressing golden brass piston valves as microscopic condensation mist and shimmering acoustic shockwaves ripple out from the polished trumpet bell. Dimly lit symphony concert hall stage with dark acoustic wood panels, dramatic warm golden rim lighting and volumetric spotlight beams cutting through subtle stage haze. Shot on Arri Alexa 65, anamorphic lens, shallow depth of field, cinematic 4K, 24fps.
+        </div>
+
+        <!-- 四大萬能公式結構拆解 -->
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+            <div class="font-mono text-cyan-400 font-bold mb-1">1. 鏡頭運鏡與焦段</div>
+            <div class="text-slate-200 leading-relaxed">85mm 微距人像鏡平視緩慢推軌（Slow macro tracking shot），淺景深聚焦銅管細節。</div>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+            <div class="font-mono text-rose-400 font-bold mb-1">2. 主體與具體動作</div>
+            <div class="text-slate-200 leading-relaxed">演奏者指尖按下黃金活塞閥門，拋光號口震動噴湧出微小水霧與聲波漣漪。</div>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+            <div class="font-mono text-emerald-400 font-bold mb-1">3. 環境與空間細節</div>
+            <div class="text-slate-200 leading-relaxed">深色胡桃木聲學反射板交響音樂廳舞台，空氣中漂浮微細舞台薄霧粒子。</div>
+          </div>
+          <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+            <div class="font-mono text-amber-400 font-bold mb-1">4. 光影、色彩與規格</div>
+            <div class="text-slate-200 leading-relaxed">戲劇性暖金輪廓逆光與體積聚光燈束，Arri Alexa 65 變形寬銀幕 4K 24fps。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 啟動滾動按鈕 -->
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          id="hero-start-btn"
+          type="button"
+          class="px-7 py-3.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-bold text-sm tracking-wide shadow-[0_0_28px_rgba(251,191,36,0.45)] hover:shadow-[0_0_40px_rgba(251,191,36,0.75)] transition transform hover:-translate-y-0.5 cursor-pointer"
+        >
+          開始滾動探索小號 6 大發聲階段 ↓
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. PINNED 核心展示視窗區塊 (停留在一個視窗大小 100dvh) ==================== -->
+  <section id="pinned-stage" class="relative w-full h-[100dvh] min-h-[580px] max-h-[1080px] pt-12 pb-2 overflow-hidden bg-slate-950 bg-acoustic-grid select-none flex flex-col justify-between">
+    <div class="absolute inset-0 bg-radial-vignette pointer-events-none"></div>
+
+    <!-- 動態聲學氛圍背景光球 -->
+    <div id="ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[560px] h-[340px] sm:h-[560px] rounded-full bg-cyan-500/10 blur-[130px] pointer-events-none transition-colors duration-700"></div>
+
+    <!-- 主容器：三欄式/絕對定位混合編排 (黃金比例 左4 : 中3 : 右5) -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 py-2 flex flex-col justify-center overflow-hidden">
+
+      <div class="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-5 lg:gap-6 items-center">
+
+        <!-- [左側欄 / 4 欄]：小號聲學剖面透視儀 + 即時物理遙測 HUD -->
+        <div class="relative z-10 lg:col-span-4 flex flex-col gap-2.5 sm:gap-3.5 justify-center">
+
+          <!-- 小號聲學透視模擬器 (Acoustic Bore & Wave Analyzer) -->
+          <div class="glass-panel rounded-3xl p-3.5 sm:p-4">
+            <div class="flex items-center justify-between text-xs font-mono text-slate-300 mb-2">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] shrink-0">ACOUSTIC LAB</span>
+                <span id="lab-zone-label" class="text-white font-bold truncate text-xs">ZONE 01 // 橫膈膜高壓氣柱</span>
+              </div>
+              <span id="lab-wave-mode" class="text-cyan-400 font-bold text-xs shrink-0">DC AIRFLOW</span>
+            </div>
+
+            <!-- 聲學剖面與駐波動態畫布 -->
+            <div class="relative w-full h-28 sm:h-32 lg:h-40 rounded-2xl bg-slate-950/90 border border-white/10 overflow-hidden flex items-center justify-center">
+              <svg class="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                  <linearGradient id="brass-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#22d3ee" />
+                    <stop offset="50%" stop-color="#fbbf24" />
+                    <stop offset="100%" stop-color="#f59e0b" />
+                  </linearGradient>
+                  <filter id="part-glow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <!-- 背景座標格線 -->
+                <line x1="0" y1="90" x2="500" y2="90" stroke="rgba(255,255,255,0.07)" stroke-dasharray="3 5" />
+                <line x1="120" y1="15" x2="120" y2="165" stroke="rgba(255,255,255,0.05)" />
+                <line x1="250" y1="15" x2="250" y2="165" stroke="rgba(255,255,255,0.05)" />
+                <line x1="380" y1="15" x2="380" y2="165" stroke="rgba(255,255,255,0.05)" />
+
+                <!-- 1. 氣息區與雙唇 (Lips & Air Column) -->
+                <g id="part-breath" class="trumpet-part" opacity="1">
+                  <circle cx="38" cy="90" r="22" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="3 3" />
+                  <path d="M 22 82 Q 38 90 54 82 M 22 98 Q 38 90 54 98" fill="none" stroke="#f43f5e" stroke-width="3" stroke-linecap="round" />
+                  <text x="38" y="130" text-anchor="middle" fill="#22d3ee" font-family="JetBrains Mono" font-size="9">AIR + LIPS</text>
+                </g>
+
+                <!-- 2. 號嘴杯部與喉部 (Mouthpiece Cup & Venturi Throat) -->
+                <g id="part-mouthpiece" class="trumpet-part" opacity="0.45">
+                  <path d="M 58 72 C 72 72, 78 83, 92 84 L 118 84 L 118 96 L 92 96 C 78 97, 72 108, 58 108 Z" fill="rgba(251,191,36,0.2)" stroke="#fbbf24" stroke-width="2" />
+                  <text x="88" y="62" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">MOUTHPIECE</text>
+                </g>
+
+                <!-- 3. 吹管與圓柱主管道 (Leadpipe & Cylindrical Bore) -->
+                <g id="part-bore" class="trumpet-part" opacity="0.45">
+                  <rect x="118" y="83" width="210" height="14" rx="3" fill="rgba(52,211,153,0.12)" stroke="#34d399" stroke-width="1.8" />
+                  <!-- 迴圈管示意 -->
+                  <path d="M 150 97 C 150 132, 300 132, 300 97" fill="none" stroke="#34d399" stroke-width="2" stroke-opacity="0.5" />
+                </g>
+
+                <!-- 4. 三組ピストン活塞閥門 (3 Piston Valves) -->
+                <g id="part-valves" class="trumpet-part" opacity="0.45">
+                  <rect id="valve-1" x="185" y="52" width="18" height="45" rx="3" fill="#1e293b" stroke="#a855f7" stroke-width="1.8" />
+                  <rect id="valve-2" x="215" y="58" width="18" height="39" rx="3" fill="#1e293b" stroke="#a855f7" stroke-width="1.8" />
+                  <rect id="valve-3" x="245" y="52" width="18" height="45" rx="3" fill="#1e293b" stroke="#a855f7" stroke-width="1.8" />
+                  <line x1="189" y1="46" x2="199" y2="46" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" />
+                  <line x1="219" y1="52" x2="229" y2="52" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" />
+                  <line x1="249" y1="46" x2="259" y2="46" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round" />
+                  <text x="224" y="36" text-anchor="middle" fill="#c084fc" font-family="JetBrains Mono" font-size="9">3 PISTON VALVES</text>
+                </g>
+
+                <!-- 5. 指數型擴張號口 (Exponential Brass Bell) -->
+                <g id="part-bell" class="trumpet-part" opacity="0.45">
+                  <path d="M 328 83 C 365 82, 395 62, 422 36 L 422 144 C 395 118, 365 98, 328 97 Z" fill="rgba(251,191,36,0.22)" stroke="#fbbf24" stroke-width="2.2" />
+                  <text x="395" y="26" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono" font-size="9">BELL FLARE</text>
+                </g>
+
+                <!-- 6. 管內動態駐波正弦波 (Standing Wave Curve) -->
+                <path
+                  id="standing-wave-path"
+                  d="M 65 90 Q 110 75, 155 90 T 245 90 T 335 90 T 415 90"
+                  fill="none"
+                  stroke="url(#brass-grad)"
+                  stroke-width="2.5"
+                  filter="url(#part-glow)"
+                />
+
+                <!-- 7. 號口外部聲波輻射環 (Acoustic Radiation Rings) -->
+                <g id="bell-radiation-rings" opacity="0.15">
+                  <path d="M 432 52 A 45 45 0 0 1 432 128" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" />
+                  <path d="M 448 38 A 65 65 0 0 1 448 142" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" />
+                  <path d="M 465 24 A 85 85 0 0 1 465 156" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4 4" stroke-linecap="round" />
+                </g>
+              </svg>
+
+              <!-- 觀景窗底部資訊標籤 -->
+              <div class="absolute bottom-1.5 inset-x-2.5 flex items-center justify-between pointer-events-none text-[10px] font-mono">
+                <span class="px-1.5 py-0.5 rounded bg-black/65 text-cyan-300 border border-white/10">BORE: 148cm (Bb)</span>
+                <span id="lab-status-tag" class="px-1.5 py-0.5 rounded bg-black/65 text-amber-300 font-semibold border border-white/10">能量轉換: 橫膈膜加壓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 即時聲學物理遙測儀表板 (3 Metrics) -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-2.5 font-mono">
+            <div class="glass-panel py-2.5 px-2 sm:p-3 rounded-2xl text-center">
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider">氣流風壓</div>
+              <div id="metric-pressure" class="text-sm sm:text-lg font-bold text-cyan-400 mt-0.5">3.2 kPa</div>
+            </div>
+            <div class="glass-panel py-2.5 px-2 sm:p-3 rounded-2xl text-center">
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider">共鳴頻率</div>
+              <div id="metric-freq" class="text-sm sm:text-lg font-bold text-amber-400 mt-0.5">233 Hz</div>
+            </div>
+            <div class="glass-panel py-2.5 px-2 sm:p-3 rounded-2xl text-center">
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider">聲壓輸出</div>
+              <div id="metric-spl" class="text-sm sm:text-lg font-bold text-purple-400 mt-0.5">72 dB</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- [中央欄 / 3 欄]：SVG 平滑向量曲線導軌 (6 節點雙向聯動) -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none lg:static lg:opacity-100 lg:col-span-3 lg:h-[460px] flex items-center justify-center">
+          <svg id="timeline-svg" class="w-full h-full max-h-[460px] lg:pointer-events-auto" viewBox="0 0 400 650" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="neon-stroke-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee" />
+                <stop offset="22%" stop-color="#f43f5e" />
+                <stop offset="45%" stop-color="#fbbf24" />
+                <stop offset="68%" stop-color="#34d399" />
+                <stop offset="85%" stop-color="#a855f7" />
+                <stop offset="100%" stop-color="#fbbf24" />
+              </linearGradient>
+
+              <filter id="neon-glow" x="-40%" y="-40%" width="180%" height="180%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur1" />
+                <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+
+              <linearGradient id="wave-cone-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <!-- 垂直聲學軸線 -->
+            <line x1="200" y1="25" x2="200" y2="625" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 6" stroke-width="1" />
+
+            <!-- 1. 靜態底軌 (Static Base Track) -->
+            <path
+              id="svg-base-track"
+              d="M 200 45 C 85 95, 85 135, 145 155 C 235 185, 315 215, 255 265 C 195 315, 95 335, 145 375 C 195 415, 315 445, 255 490 C 195 535, 140 565, 200 605"
+              fill="none"
+              stroke="rgba(255,255,255,0.12)"
+              stroke-width="5"
+              stroke-linecap="round"
+            />
+
+            <!-- 2. 動態描邊軌 (Active Draw Track) -->
+            <path
+              id="svg-active-track"
+              d="M 200 45 C 85 95, 85 135, 145 155 C 235 185, 315 215, 255 265 C 195 315, 95 335, 145 375 C 195 415, 315 445, 255 490 C 195 535, 140 565, 200 605"
+              fill="none"
+              stroke="url(#neon-stroke-grad)"
+              stroke-width="5"
+              stroke-linecap="round"
+              filter="url(#neon-glow)"
+            />
+
+            <!-- 隨曲線移動的聲波探頭 (Acoustic Playhead) -->
+            <g id="svg-playhead" transform="translate(200, 45)">
+              <polygon id="playhead-cone" points="0,0 -24,-42 24,-42" fill="url(#wave-cone-grad)" />
+              <circle r="12" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 3" />
+              <circle r="5" fill="#ffffff" filter="url(#neon-glow)" />
+            </g>
+
+            <!-- 6 個可互動 SVG 階段節點 -->
+            <!-- Node 01 (200, 45) -->
+            <g class="timeline-node is-active" data-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="Phase 01: 腹式呼吸與氣柱">
+              <circle class="node-pulse" cx="200" cy="45" r="20" fill="rgba(34, 211, 238, 0.15)" />
+              <circle class="node-outer" cx="200" cy="45" r="11" fill="#020617" stroke="#22d3ee" stroke-width="3" filter="url(#neon-glow)" />
+              <circle class="node-core" cx="200" cy="45" r="4.5" fill="#22d3ee" />
+              <text x="220" y="50" fill="#22d3ee" font-family="JetBrains Mono" font-size="11" font-weight="700">01 // 氣柱</text>
+            </g>
+
+            <!-- Node 02 (145, 155) -->
+            <g class="timeline-node" data-phase="1" style="--active-color: #f43f5e;" role="button" tabindex="0" aria-label="Phase 02: 雙唇振源與伯努利效應">
+              <circle class="node-pulse" cx="145" cy="155" r="20" fill="rgba(244, 63, 94, 0.12)" />
+              <circle class="node-outer" cx="145" cy="155" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="145" cy="155" r="4.5" fill="#94a3b8" />
+              <text x="58" y="160" fill="#fb7185" font-family="JetBrains Mono" font-size="11" font-weight="700">02 // 唇振</text>
+            </g>
+
+            <!-- Node 03 (255, 265) -->
+            <g class="timeline-node" data-phase="2" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="Phase 03: 號嘴杯部聚能">
+              <circle class="node-pulse" cx="255" cy="265" r="20" fill="rgba(251, 191, 36, 0.12)" />
+              <circle class="node-outer" cx="255" cy="265" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="255" cy="265" r="4.5" fill="#94a3b8" />
+              <text x="275" y="270" fill="#fbbf24" font-family="JetBrains Mono" font-size="11" font-weight="700">03 // 號嘴</text>
+            </g>
+
+            <!-- Node 04 (145, 375) -->
+            <g class="timeline-node" data-phase="3" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="Phase 04: 圓柱管體駐波">
+              <circle class="node-pulse" cx="145" cy="375" r="20" fill="rgba(52, 211, 153, 0.12)" />
+              <circle class="node-outer" cx="145" cy="375" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="145" cy="375" r="4.5" fill="#94a3b8" />
+              <text x="58" y="380" fill="#34d399" font-family="JetBrains Mono" font-size="11" font-weight="700">04 // 駐波</text>
+            </g>
+
+            <!-- Node 05 (255, 490) -->
+            <g class="timeline-node" data-phase="4" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="Phase 05: 活塞閥門變調">
+              <circle class="node-pulse" cx="255" cy="490" r="20" fill="rgba(168, 85, 247, 0.12)" />
+              <circle class="node-outer" cx="255" cy="490" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="255" cy="490" r="4.5" fill="#94a3b8" />
+              <text x="275" y="495" fill="#c084fc" font-family="JetBrains Mono" font-size="11" font-weight="700">05 // 活塞</text>
+            </g>
+
+            <!-- Node 06 (200, 605) -->
+            <g class="timeline-node" data-phase="5" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="Phase 06: 號口指數輻射">
+              <circle class="node-pulse" cx="200" cy="605" r="20" fill="rgba(251, 191, 36, 0.15)" />
+              <circle class="node-outer" cx="200" cy="605" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
+              <circle class="node-core" cx="200" cy="605" r="4.5" fill="#94a3b8" />
+              <text x="220" y="610" fill="#fbbf24" font-family="JetBrains Mono" font-size="11" font-weight="700">06 // 綻放</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- [右側欄 / 5 欄]：6 階段說明卡槽 (Grid 同格自適應包覆，高舒適度排版) -->
+        <div class="relative z-10 lg:col-span-5 card-stack">
+
+          <!-- PHASE 01 -->
+          <div data-phase-card="0" class="phase-card is-active flex flex-col justify-between" title="點擊鎖定至 Phase 01">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+                  <span>PHASE 01 — 氣流動力源</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-cyan-400 font-bold">01</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                腹式呼吸與高壓穩定氣柱
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                小號發聲的第一步並非吹氣，而是建立高密度的「氣柱支撐（Air Column）」。演奏者透過橫膈膜下沉與肋間肌擴張吸入飽滿空氣，再由核心肌群穩定加壓推送，在口腔後方形成 3 至 15 kPa 的穩定直流氣壓，作為驅動整支銅管共鳴的原始能量引擎。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-cyan-200/90">
+                💨 物理角色：直流氣壓能源 (DC Air Supply)
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-400/20 text-cyan-300">
+                ⚡ 關鍵技巧：橫膈膜支撐、喉部放鬆不憋氣
+              </span>
+            </div>
+          </div>
+
+          <!-- PHASE 02 -->
+          <div data-phase-card="1" class="phase-card flex flex-col justify-between" title="點擊鎖定至 Phase 02">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shadow-[0_0_8px_#f43f5e]"></span>
+                  <span>PHASE 02 — 雙唇振源機制</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-rose-400 font-bold">02</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                嘴型控制與伯努利雙唇震動
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                小號沒有木管樂器的竹片，演奏者的雙唇就是「氣動簧片（Lip Reed）」。當氣流衝開微閉的雙唇（Embouchure），根據伯努利效應（Bernoulli Effect），高速氣流使唇間氣壓驟降並將雙唇吸回閉合，每秒周而復始開合數百次（Buzzing），將穩定氣流切割為高頻聲波脈衝。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-rose-200/90">
+                👄 物理角色：自激振盪閥 (Self-Oscillating Valve)
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-400/20 text-rose-300">
+                🎵 頻率範圍：約 165 Hz ~ 1175 Hz+
+              </span>
+            </div>
+          </div>
+
+          <!-- PHASE 03 -->
+          <div data-phase-card="2" class="phase-card flex flex-col justify-between" title="點擊鎖定至 Phase 03">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
+                  <span>PHASE 03 — 號嘴聲學耦合</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-amber-400 font-bold">03</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                號嘴杯部聚能與文丘里喉孔加速
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                單靠嘴唇乾吹的蜂鳴聲微弱且鬆散，必須透過金屬號嘴（Mouthpiece）進行聲阻抗匹配。淺杯號嘴能強化高頻泛音與爆發力，深杯則帶來溫暖厚實音色；聲波在杯部（Cup）產生亥姆霍茲共振後，經狹窄喉部（Throat）文丘里效應加速，高壓注入吹管。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-amber-200/90">
+                🎺 結構組件：內緣 (Rim) ➔ 杯部 (Cup) ➔ 喉孔 (Throat)
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/20 text-amber-300">
+                🔊 聲學效應：亥姆霍茲共振 + 聲阻抗轉換
+              </span>
+            </div>
+          </div>
+
+          <!-- PHASE 04 -->
+          <div data-phase-card="3" class="phase-card flex flex-col justify-between" title="點擊鎖定至 Phase 04">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+                  <span>PHASE 04 — 駐波與泛音列</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-emerald-400 font-bold">04</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                148 公分圓柱管體駐波與泛音鎖定
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                聲波進入長約 148 公分的圓柱形主管道後，在號嘴封閉端與號口開放端之間高速來回反射，疊加形成穩定的「駐波（Standing Wave）」。即使不按任何按鍵，演奏者只要改變唇部張力與氣流速度，就能在管內激發第 2、3、4、5、6 等自然泛音列（Harmonic Series）。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-emerald-200/90">
+                〰️ 物理現象：管內縱波反射與波腹/波節疊加
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-400/20 text-emerald-300">
+                🎼 自然泛音：C4 ➔ G4 ➔ C5 ➔ E5 ➔ G5
+              </span>
+            </div>
+          </div>
+
+          <!-- PHASE 05 -->
+          <div data-phase-card="4" class="phase-card flex flex-col justify-between" title="點擊鎖定至 Phase 05">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-400/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]"></span>
+                  <span>PHASE 05 — 活塞管長調變</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-purple-400 font-bold">05</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                三組ピストン活塞閥門與半音階系統
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                為了填補自然泛音之間的音程空隙，現代小號配置了三組精密活塞閥門（Piston Valves）。按下第 2 鍵延長管長降低半音、第 1 鍵降低全音、第 3 鍵降低小三度；透過 7 種指法組合切換有效共振管長，即可吹奏出完整且精準的十二平均律半音階。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-purple-200/90">
+                🎹 活塞降音：2號(-1半音) / 1號(-2半音) / 3號(-3半音)
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-400/20 text-purple-300">
+                ⚙️ 組合變化：7 組核心指法串聯全音域
+              </span>
+            </div>
+          </div>
+
+          <!-- PHASE 06 -->
+          <div data-phase-card="5" class="phase-card flex flex-col justify-between" title="點擊鎖定至 Phase 06">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-3.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
+                  <span>PHASE 06 — 號口聲學綻放</span>
+                </div>
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-semibold">
+                  <span class="text-amber-400 font-bold">06</span> / 06
+                </div>
+              </div>
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
+                指數型號口輻射與黃金銅管泛音
+              </div>
+              <p class="mt-3 sm:mt-3.5 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.85] tracking-[0.015em]">
+                聲波抵達末端呈指數曲線展開的 12.3 公分黃銅號口（Exponential Bell）。號口如同高頻濾波擴音器：將低頻能量反射回管內維持駐波穩定，同時讓高頻泛音突破空氣阻抗高效輻射至音樂廳空間，賦予小號極具穿透力、輝煌燦爛的「黃金銅管音色（Brassy Brilliance）」。
+              </p>
+            </div>
+            <div class="mt-4 sm:mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-amber-200/90">
+                🌟 聲學功能：高通聲波輻射器 + 指向性投射
+              </span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-400/30 text-amber-300">
+                🔥 動態峰值：最高可達 110+ dB 穿透交響樂團
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 3. 底部浮動 HUD 快捷切換導覽列 (6 階段同步高亮) -->
+    <nav aria-label="小號發聲階段快捷切換 HUD" class="relative z-30 shrink-0 w-full max-w-3xl mx-auto px-3 sm:px-4 pb-2">
+      <div class="glass-panel p-1.5 rounded-2xl grid grid-cols-6 gap-1 sm:gap-1.5 shadow-2xl">
+        <button type="button" data-hud-btn="0" class="hud-btn is-active py-1.5 px-1 rounded-xl border border-transparent text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-cyan-400 font-bold">PHASE 01</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full text-white">氣柱加壓</span>
+        </button>
+
+        <button type="button" data-hud-btn="1" class="hud-btn py-1.5 px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-rose-400 font-bold">PHASE 02</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">雙唇振源</span>
+        </button>
+
+        <button type="button" data-hud-btn="2" class="hud-btn py-1.5 px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-amber-400 font-bold">PHASE 03</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">號嘴聚能</span>
+        </button>
+
+        <button type="button" data-hud-btn="3" class="hud-btn py-1.5 px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-emerald-400 font-bold">PHASE 04</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">管體駐波</span>
+        </button>
+
+        <button type="button" data-hud-btn="4" class="hud-btn py-1.5 px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-purple-400 font-bold">PHASE 05</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">活塞變調</span>
+        </button>
+
+        <button type="button" data-hud-btn="5" class="hud-btn py-1.5 px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center font-mono flex flex-col items-center">
+          <span class="text-[9px] sm:text-[10px] text-amber-400 font-bold">PHASE 06</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">號口綻放</span>
+        </button>
+      </div>
+    </nav>
+  </section>
+
+  <!-- ==================== 3. 後續結論與聲學數據總結區塊 ==================== -->
+  <section id="conclusion-section" class="relative py-20 px-4 sm:px-6 bg-slate-950 border-t border-slate-800/80">
+    <div class="max-w-6xl mx-auto">
+
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono uppercase tracking-widest">
+          ACOUSTIC DATA SUMMARY // 聲學物理數據總結
+        </span>
+        <div class="mt-4 text-2xl sm:text-4xl font-black text-white tracking-tight">
+          六大發聲階段聲學參數對照表
+        </div>
+        <p class="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed">
+          從人體呼吸力學到黃銅管體駐波共鳴，每一個環節都決定了小號最終的音準、音色亮度與動態張力。
+        </p>
+      </div>
+
+      <!-- 6 階段聲學卡片總覽 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-14">
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-cyan-400">
+          <div class="text-xs font-mono text-cyan-400 font-bold">01 // AIR COLUMN</div>
+          <div class="text-lg font-bold text-white mt-1">腹式呼吸與高壓氣柱</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">口腔內壓達 3.0 ~ 15.0 kPa，流速決定音量動態（pp 至 ff），穩定度決定長音音準。</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-rose-400">
+          <div class="text-xs font-mono text-rose-400 font-bold">02 // LIP REED BUZZING</div>
+          <div class="text-lg font-bold text-white mt-1">雙唇伯努利自激震動</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">唇部肌群張力控制每秒開合次數，將直流氣流轉化為周期性交流聲壓脈衝。</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-amber-400">
+          <div class="text-xs font-mono text-amber-400 font-bold">03 // MOUTHPIECE COUPLING</div>
+          <div class="text-lg font-bold text-white mt-1">號嘴杯部聚能與加速</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">约 3.7mm 喉孔產生文丘里效應，提升高頻泛音比例並完成唇部與管體的阻抗匹配。</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-emerald-400">
+          <div class="text-xs font-mono text-emerald-400 font-bold">04 // STANDING WAVE</div>
+          <div class="text-lg font-bold text-white mt-1">148cm 圓柱管體駐波</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">聲波以 343 m/s 在管內來回反射，鎖定自然泛音列（Bb2 基音至高音 C6 以上）。</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-purple-400">
+          <div class="text-xs font-mono text-purple-400 font-bold">05 // PISTON VALVES</div>
+          <div class="text-lg font-bold text-white mt-1">三活塞閥門管長調變</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">1號鍵增長約 16cm、2號鍵增長約 7.5cm、3號鍵增長約 25.5cm，精準銜接半音階。</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-5 border-t-2 border-t-amber-300">
+          <div class="text-xs font-mono text-amber-300 font-bold">06 // BELL RADIATION</div>
+          <div class="text-lg font-bold text-white mt-1">指數型號口泛音綻放</div>
+          <p class="text-xs text-slate-300 mt-2 leading-relaxed">截止頻率（Cutoff Frequency）約 1400 Hz 以上高頻直接向空間輻射，造就輝煌金屬音色。</p>
+        </div>
+      </div>
+
+      <!-- 返回頂部互動按鈕 -->
+      <div class="text-center">
+        <button
+          id="back-to-top-btn"
+          type="button"
+          class="px-6 py-3 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700 text-amber-300 font-mono text-xs tracking-wider transition cursor-pointer"
+        >
+          ↑ BACK TO TOP // 重新體驗滾動聲學時間軸
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== 內聯互動與 GSAP Scrollytelling 核心腳本 ==================== -->
+  <script>
+    (function () {
+      gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+      // 6 個主要發聲階段完整聲學數據
+      var phasesData = [
+        {
+          index: 0,
+          zoneLabel: 'ZONE 01 // 橫膈膜高壓氣柱',
+          waveMode: 'DC AIRFLOW',
+          statusTag: '能量轉換: 橫膈膜穩定加壓',
+          pressure: '3.2 kPa',
+          freq: '0 Hz (氣流)',
+          spl: '45 dB',
+          color: '#22d3ee',
+          glowClass: 'bg-cyan-500/10',
+          waveAmp: 2,
+          waveCycles: 1,
+          radiationOpacity: 0.08,
+          activePart: 'part-breath',
+          valvesDown: [0, 0, 0]
+        },
+        {
+          index: 1,
+          zoneLabel: 'ZONE 02 // 雙唇伯努利振源',
+          waveMode: 'LIP BUZZING',
+          statusTag: '能量轉換: 氣流切割為脈衝波',
+          pressure: '5.8 kPa',
+          freq: '233 Hz (Bb3)',
+          spl: '68 dB',
+          color: '#f43f5e',
+          glowClass: 'bg-rose-500/10',
+          waveAmp: 10,
+          waveCycles: 2,
+          radiationOpacity: 0.18,
+          activePart: 'part-breath',
+          valvesDown: [0, 0, 0]
+        },
+        {
+          index: 2,
+          zoneLabel: 'ZONE 03 // 號嘴杯部與喉孔',
+          waveMode: 'VENTURI BOOST',
+          statusTag: '能量轉換: 亥姆霍茲聚能加速',
+          pressure: '8.4 kPa',
+          freq: '349 Hz (F4)',
+          spl: '82 dB',
+          color: '#fbbf24',
+          glowClass: 'bg-amber-500/10',
+          waveAmp: 15,
+          waveCycles: 3,
+          radiationOpacity: 0.35,
+          activePart: 'part-mouthpiece',
+          valvesDown: [0, 0, 0]
+        },
+        {
+          index: 3,
+          zoneLabel: 'ZONE 04 // 148cm 圓柱管體駐波',
+          waveMode: 'STANDING WAVE',
+          statusTag: '能量轉換: 管內駐波泛音共鳴',
+          pressure: '10.6 kPa',
+          freq: '466 Hz (Bb4)',
+          spl: '94 dB',
+          color: '#34d399',
+          glowClass: 'bg-emerald-500/10',
+          waveAmp: 20,
+          waveCycles: 4,
+          radiationOpacity: 0.55,
+          activePart: 'part-bore',
+          valvesDown: [0, 0, 0]
+        },
+        {
+          index: 4,
+          zoneLabel: 'ZONE 05 // ピストン活塞閥門變調',
+          waveMode: 'VALVE MODULATION',
+          statusTag: '能量轉換: 迂迴管延長改變音高',
+          pressure: '12.2 kPa',
+          freq: '587 Hz (D5)',
+          spl: '101 dB',
+          color: '#a855f7',
+          glowClass: 'bg-purple-500/10',
+          waveAmp: 22,
+          waveCycles: 5,
+          radiationOpacity: 0.72,
+          activePart: 'part-valves',
+          valvesDown: [1, 1, 0]
+        },
+        {
+          index: 5,
+          zoneLabel: 'ZONE 06 // 指數型號口聲學綻放',
+          waveMode: 'BELL RADIATION',
+          statusTag: '能量轉換: 高頻泛音向空間綻放',
+          pressure: '14.8 kPa',
+          freq: '932 Hz (Bb5)',
+          spl: '112 dB',
+          color: '#fbbf24',
+          glowClass: 'bg-amber-500/15',
+          waveAmp: 26,
+          waveCycles: 6,
+          radiationOpacity: 1.0,
+          activePart: 'part-bell',
+          valvesDown: [0, 0, 0]
+        }
+      ];
+
+      // DOM 元素參照
+      var pinnedStage = document.getElementById('pinned-stage');
+      var activeTrack = document.getElementById('svg-active-track');
+      var playhead = document.getElementById('svg-playhead');
+      var topProgressBar = document.getElementById('top-progress-bar');
+      var topProgressText = document.getElementById('top-progress-text');
+      var headerFreqReadout = document.getElementById('header-freq-readout');
+      var ambientGlow = document.getElementById('ambient-glow');
+
+      var labZoneLabel = document.getElementById('lab-zone-label');
+      var labWaveMode = document.getElementById('lab-wave-mode');
+      var labStatusTag = document.getElementById('lab-status-tag');
+      var standingWavePath = document.getElementById('standing-wave-path');
+      var bellRadiationRings = document.getElementById('bell-radiation-rings');
+
+      var metricPressure = document.getElementById('metric-pressure');
+      var metricFreq = document.getElementById('metric-freq');
+      var metricSpl = document.getElementById('metric-spl');
+
+      var valve1 = document.getElementById('valve-1');
+      var valve2 = document.getElementById('valve-2');
+      var valve3 = document.getElementById('valve-3');
+
+      var trumpetParts = {
+        'part-breath': document.getElementById('part-breath'),
+        'part-mouthpiece': document.getElementById('part-mouthpiece'),
+        'part-bore': document.getElementById('part-bore'),
+        'part-valves': document.getElementById('part-valves'),
+        'part-bell': document.getElementById('part-bell')
+      };
+
+      var svgNodes = document.querySelectorAll('.timeline-node');
+      var phaseCards = document.querySelectorAll('[data-phase-card]');
+      var hudButtons = document.querySelectorAll('[data-hud-btn]');
+
+      // 1. 初始化 SVG 路徑總長度與 strokeDashoffset
+      var pathLength = activeTrack.getTotalLength();
+      activeTrack.style.strokeDasharray = String(pathLength);
+      activeTrack.style.strokeDashoffset = String(pathLength);
+
+      // 6 個節點在 SVG 上的座標
+      var nodeTargets = [
+        { x: 200, y: 45 },
+        { x: 145, y: 155 },
+        { x: 255, y: 265 },
+        { x: 145, y: 375 },
+        { x: 255, y: 490 },
+        { x: 200, y: 605 }
+      ];
+
+      // 計算每個節點對應在曲線上的精確進度比例 (0.0 ~ 1.0)
+      var nodeRatios = nodeTargets.map(function (target) {
+        var bestLength = 0;
+        var minDistance = Infinity;
+        var steps = 500;
+        for (var i = 0; i <= steps; i++) {
+          var len = (i / steps) * pathLength;
+          var pt = activeTrack.getPointAtLength(len);
+          var dist = Math.hypot(pt.x - target.x, pt.y - target.y);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestLength = len;
+          }
+        }
+        return bestLength / pathLength;
+      });
+
+      nodeRatios[0] = 0;
+      nodeRatios[5] = 1;
+
+      var currentActiveIndex = -1;
+
+      // 動態生成小號管內駐波 SVG Path
+      function buildStandingWavePath(progress) {
+        var startX = 65;
+        var endX = 418;
+        var centerY = 90;
+        var amp = 3 + progress * 22;
+        var cycles = 1.5 + progress * 4.5;
+        var points = [];
+        var steps = 60;
+        for (var i = 0; i <= steps; i++) {
+          var t = i / steps;
+          var x = startX + (endX - startX) * t;
+          var envelope = Math.sin(t * Math.PI);
+          var y = centerY + Math.sin(t * Math.PI * 2 * cycles - progress * 18) * amp * (0.35 + 0.65 * envelope);
+          points.push((i === 0 ? 'M ' : 'L ') + x.toFixed(1) + ' ' + y.toFixed(1));
+        }
+        return points.join(' ');
+      }
+
+      // 切換當前高亮階段
+      function setActivePhase(index) {
+        if (currentActiveIndex === index) return;
+        currentActiveIndex = index;
+        var data = phasesData[index];
+
+        labZoneLabel.textContent = data.zoneLabel;
+        labWaveMode.textContent = data.waveMode;
+        labStatusTag.textContent = data.statusTag;
+        headerFreqReadout.textContent = data.freq;
+
+        metricPressure.textContent = data.pressure;
+        metricFreq.textContent = data.freq.split(' ')[0] + ' Hz';
+        metricSpl.textContent = data.spl;
+
+        ambientGlow.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[560px] h-[340px] sm:h-[560px] rounded-full blur-[130px] pointer-events-none transition-colors duration-700 ' + data.glowClass;
+
+        // 高亮對應的小號解剖部件
+        Object.keys(trumpetParts).forEach(function (key) {
+          var el = trumpetParts[key];
+          if (!el) return;
+          if (key === data.activePart) {
+            el.setAttribute('opacity', '1');
+            el.setAttribute('filter', 'url(#part-glow)');
+          } else {
+            el.setAttribute('opacity', '0.38');
+            el.removeAttribute('filter');
+          }
+        });
+
+        // 活塞按下動態模擬
+        if (valve1 && valve2 && valve3) {
+          valve1.setAttribute('y', data.valvesDown[0] ? '62' : '52');
+          valve2.setAttribute('y', data.valvesDown[1] ? '66' : '58');
+          valve3.setAttribute('y', data.valvesDown[2] ? '62' : '52');
+        }
+
+        // 更新 SVG 節點高亮狀態
+        svgNodes.forEach(function (node, i) {
+          var outer = node.querySelector('.node-outer');
+          var core = node.querySelector('.node-core');
+          if (i <= index) {
+            node.classList.add('is-active');
+            outer.setAttribute('stroke', phasesData[i].color);
+            core.setAttribute('fill', phasesData[i].color);
+          } else {
+            node.classList.remove('is-active');
+            outer.setAttribute('stroke', '#475569');
+            core.setAttribute('fill', '#94a3b8');
+          }
+        });
+
+        // 更新右側階段說明卡片淡入與縮放
+        phaseCards.forEach(function (card) {
+          var cardIdx = parseInt(card.getAttribute('data-phase-card'), 10);
+          if (cardIdx === index) {
+            card.classList.add('is-active');
+            gsap.to(card, {
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              duration: 0.38,
+              ease: 'power3.out',
+              overwrite: 'auto'
+            });
+          } else {
+            card.classList.remove('is-active');
+            gsap.to(card, {
+              opacity: 0,
+              scale: 0.97,
+              y: 14,
+              duration: 0.3,
+              ease: 'power2.out',
+              overwrite: 'auto'
+            });
+          }
+        });
+
+        // 更新底部 HUD 快捷按鈕高亮
+        hudButtons.forEach(function (btn, i) {
+          if (i === index) {
+            btn.classList.add('is-active');
+            btn.classList.remove('text-slate-400');
+          } else {
+            btn.classList.remove('is-active');
+            btn.classList.add('text-slate-400');
+          }
+        });
+      }
+
+      // 隨滾動進度即時更新畫面 (0.0 ~ 1.0)
+      function updateStageOnScroll(progress) {
+        var clamped = Math.max(0, Math.min(1, progress));
+
+        // 頂部進度條與百分比
+        topProgressBar.style.transform = 'scaleX(' + clamped + ')';
+        var pct = Math.round(clamped * 100);
+        topProgressText.textContent = String(pct).padStart(3, '0') + '%';
+
+        // 中央 SVG 曲線動態畫線
+        var drawLength = pathLength * clamped;
+        activeTrack.style.strokeDashoffset = String(pathLength - drawLength);
+
+        // 更新探頭位置
+        var currentPt = activeTrack.getPointAtLength(drawLength);
+        playhead.setAttribute('transform', 'translate(' + currentPt.x.toFixed(1) + ', ' + currentPt.y.toFixed(1) + ')');
+
+        // 更新小號管內駐波波形與號口輻射環
+        standingWavePath.setAttribute('d', buildStandingWavePath(clamped));
+        bellRadiationRings.setAttribute('opacity', (0.1 + clamped * 0.9).toFixed(2));
+
+        // 判斷當前最接近的階段節點
+        var closestIndex = 0;
+        var minDiff = Infinity;
+        nodeRatios.forEach(function (ratio, idx) {
+          var diff = Math.abs(clamped - ratio);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIndex = idx;
+          }
+        });
+
+        setActivePhase(closestIndex);
+      }
+
+      // 建立 GSAP ScrollTrigger 釘選與物理阻尼 scrub: 1.0
+      var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
+      var mainScrollTrigger = ScrollTrigger.create({
+        trigger: pinnedStage,
+        pin: true,
+        pinSpacing: true,
+        start: 'top top',
+        end: isMobileViewport ? '+=2800' : '+=3800',
+        scrub: 1.0,
+        onUpdate: function (self) {
+          updateStageOnScroll(self.progress);
+        }
+      });
+
+      // 初始狀態設定
+      setActivePhase(0);
+      updateStageOnScroll(0);
+
+      // 點擊節點或 HUD 按鈕平滑捲動至對應階段高度
+      function scrollToPhase(phaseIndex) {
+        var targetRatio = nodeRatios[phaseIndex] !== undefined ? nodeRatios[phaseIndex] : 0;
+        var targetScrollY = mainScrollTrigger.start + (mainScrollTrigger.end - mainScrollTrigger.start) * targetRatio;
+
+        gsap.to(window, {
+          scrollTo: { y: targetScrollY, autoKill: false },
+          duration: 0.95,
+          ease: 'power3.inOut'
+        });
+      }
+
+      svgNodes.forEach(function (node) {
+        var phaseIndex = parseInt(node.getAttribute('data-phase'), 10);
+        node.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+        node.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            scrollToPhase(phaseIndex);
+          }
+        });
+      });
+
+      hudButtons.forEach(function (btn) {
+        var phaseIndex = parseInt(btn.getAttribute('data-hud-btn'), 10);
+        btn.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+      });
+
+      phaseCards.forEach(function (card) {
+        var phaseIndex = parseInt(card.getAttribute('data-phase-card'), 10);
+        card.addEventListener('click', function () { scrollToPhase(phaseIndex); });
+      });
+
+      // Hero 開始探索按鈕與返回頂部按鈕
+      var heroStartBtn = document.getElementById('hero-start-btn');
+      if (heroStartBtn) {
+        heroStartBtn.addEventListener('click', function () {
+          gsap.to(window, {
+            scrollTo: { y: mainScrollTrigger.start, autoKill: false },
+            duration: 0.9,
+            ease: 'power3.inOut'
+          });
+        });
+      }
+
+      var backToTopBtn = document.getElementById('back-to-top-btn');
+      if (backToTopBtn) {
+        backToTopBtn.addEventListener('click', function () {
+          gsap.to(window, {
+            scrollTo: { y: 0, autoKill: false },
+            duration: 1.1,
+            ease: 'power3.inOut'
+          });
+        });
+      }
+
+      // 複製 AI 導演提示詞按鈕
+      var copyPromptBtn = document.getElementById('copy-prompt-btn');
+      var directorPromptText = document.getElementById('director-prompt-text');
+      if (copyPromptBtn && directorPromptText) {
+        copyPromptBtn.addEventListener('click', function () {
+          var text = directorPromptText.textContent.trim();
+          navigator.clipboard.writeText(text).then(function () {
+            var original = copyPromptBtn.textContent;
+            copyPromptBtn.textContent = '✅ 已複製提示詞！';
+            setTimeout(function () {
+              copyPromptBtn.textContent = original;
+            }, 2000);
+          });
+        });
+      }
+
+      window.addEventListener('resize', function () {
+        var idx = currentActiveIndex;
+        currentActiveIndex = -1;
+        setActivePhase(idx >= 0 ? idx : 0);
+        ScrollTrigger.refresh();
+      });
+    })();
+  </script>
+</body>
+</html>
