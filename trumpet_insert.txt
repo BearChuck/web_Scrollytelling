@@ -1,20 +1,21 @@
 <!-- =====================================================================
-  BRASS ACOUSTICS // 銅管小號發聲科學 (去背單視窗沉浸版 / Sticky Single-Viewport Embed Edition)
-  - 單視窗鎖定 (Stay in One Viewport)：
-      * 結合 GSAP ScrollTrigger Pin 釘選機制與 100dvh 視窗舞台，在滾動瀏覽時精確「停留在一個視窗大小」。
-      * 滾動滑鼠滾輪時，畫面穩固釘選在螢幕中央，零內層雙滾動條，隨進度流暢畫線並切換 6 大發聲物理階段。
-  - 三欄式/絕對定位混合編排 (黃金比例 4:3:5 舒適排版)：
-      * 左側 [4 欄]：小號剖面聲學透視儀 + 3 組即時聲學遙測數值 HUD（氣流推力、聲音音高、音量大小）。
-      * 中央 [3 欄]：SVG 霓虹向量導軌與即時音訊指針，隨滾輪平滑描邊，6 個可點擊微動效發光節點。
+  BRASS ACOUSTICS // 銅管小號發聲科學 (單視窗鎖定滾動沉浸版 / Pinned Scrollytelling Edition)
+  - 跑完滾完動畫才能繼續往下瀏覽 (Locked Single-Viewport Scrollytelling)：
+      * 結合 GSAP ScrollTrigger Pin 釘選與 pinSpacing 佔位機制。
+      * 當螢幕滾動至本區塊時，畫面精確鎖定於目前視窗（100dvh），使用者必須隨滾輪依序經歷 6 大發聲物理階段（0% ➔ 100%）。
+      * 滾動期間中央 SVG 曲線平滑畫線、音訊指針位移、管內駐波即時形變、聲學數據毫秒級插值（Lerp）。
+      * 只有當 6 階段完整播放完畢（Progress 達到 100%），畫面才會平滑解鎖，讓使用者順暢繼續往下瀏覽後續內容！
+  - 自動多組件排序校準 (Multi-Pin Sort & Refresh Safeguard)：
+      * 內建 ScrollTrigger.sort() 與二次智慧刷新機制，即使同一頁面嵌入多個不同組件（如攝影焦段 + 銅管小號），
+        也能 100% 依文檔順序精準鎖定各自的滾動區間，絕不跳過、絕不錯位！
+  - 三欄式/絕對定位混合編排 (黃金比例 4:3:5 舒適版面)：
+      * 左側 [4 欄]：小號剖面透視模擬器（氣流、雙唇、號嘴、管體、活塞、號口）+ 3 組即時聲學遙測方塊。
+      * 中央 [3 欄]：SVG 霓虹向量導軌與即時音訊指針，隨滾輪平滑描邊，6 個可點擊跳轉的發光互動節點。
       * 右側 [5 欄]：CSS Grid 同格疊層圖卡槽 (ba-card-stack)，外框隨內容舒適包覆，雙層光學邊界，零截斷。
   - 初學者白話文教學 (Beginner-Friendly Science)：
       * 徹底褪去生澀晦澀的物理公式與學術黑話。
       * 改以生動生活化比喻（吹氣球蓄力、小蜜蜂嗡嗡拍打、小漏斗聚焦、148cm金屬長管回音、3鍵切換音階、向日葵大喇叭高歌）。
       * 每一階段皆附「💨 動力來源 / 👄 發聲引擎 / 🎺 任務」與「💡 初學秘訣」，初學者一讀即懂。
-  - 連續聲學遙測動態插值 (Continuous Acoustic Metric Interpolation)：
-      * 滾動時毫秒級平滑插值（lerp）：氣流風壓 (kPa)、共鳴頻率 (Hz + 即時音名標註)、聲壓級 (dB)、管內駐波波動與號口聲波擴散環。
-  - 完美容器適配 (Embed Inside Any <div> Safely)：
-      * 單一根節點架構 (#ba-scrolly-widget)，可直接嵌入宿主網站任意 <div>、文章區塊、網格欄位或 CMS/LMS 容器內。
   - 去背透明背景 (background: transparent)：完美融入宿主網站任意深淺底色。
   - 零 H1/H2/H3 標籤：全數採用階層樣式 <div>，不影響宿主網站 SEO 與大綱層級。
   - 獨立作用域 Scoped CSS (#ba-scrolly-widget) + :where() 零權重重置，開箱即用無污染。
@@ -225,7 +226,7 @@
     }
   </style>
 
-  <!-- ==================== 釘選核心展示視窗區塊 (停留在一個視窗大小 100dvh) ==================== -->
+  <!-- ==================== 釘選核心展示視窗區塊 (停留在一個視窗大小 100dvh，跑完滾完動畫才能繼續往下瀏覽) ==================== -->
   <section id="ba-pinned-stage" class="ba-stage-viewport select-none">
 
     <!-- 1. 區塊頂部微型通透進度列 (佔高 36px) -->
@@ -235,12 +236,12 @@
       </div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center justify-between text-xs ba-font-mono text-slate-300">
         <div class="flex items-center gap-2">
-          <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]"></span>
+          <span id="ba-status-dot" class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]"></span>
           <span class="tracking-widest font-bold text-white text-xs">BRASS_ACOUSTICS // 銅管小號發聲科學</span>
         </div>
         <div class="flex items-center gap-3">
           <span id="ba-header-freq" class="text-amber-400 font-bold text-xs sm:text-sm">深呼吸蓄力 (平穩氣流)</span>
-          <div class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-amber-300 font-semibold text-[11px]">
+          <div id="ba-progress-pill" class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-amber-300 font-semibold text-[11px] transition-colors">
             <span id="ba-top-progress-text">000%</span>
           </div>
         </div>
@@ -788,6 +789,8 @@
       var playhead = root.querySelector('#ba-svg-playhead');
       var topBar = root.querySelector('#ba-top-progress-bar');
       var topText = root.querySelector('#ba-top-progress-text');
+      var progressPill = root.querySelector('#ba-progress-pill');
+      var statusDot = root.querySelector('#ba-status-dot');
       var headerFreq = root.querySelector('#ba-header-freq');
       var zoneLabel = root.querySelector('#ba-zone-label');
       var waveMode = root.querySelector('#ba-wave-mode');
@@ -940,7 +943,27 @@
       function onScrollUpdate(prog) {
         var c = Math.max(0, Math.min(1, prog));
         if (topBar) topBar.style.transform = 'scaleX(' + c + ')';
-        if (topText) topText.textContent = String(Math.round(c * 100)).padStart(3, '0') + '%';
+        var pct = Math.round(c * 100);
+
+        if (topText) {
+          if (c >= 0.99) {
+            topText.textContent = '100% (完成探索，可繼續往下瀏覽 ↓)';
+            if (progressPill) {
+              progressPill.className = 'px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 font-bold text-[11px] shadow-[0_0_12px_rgba(52,211,153,0.3)]';
+            }
+            if (statusDot) {
+              statusDot.className = 'inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]';
+            }
+          } else {
+            topText.textContent = String(pct).padStart(3, '0') + '%';
+            if (progressPill) {
+              progressPill.className = 'px-2 py-0.5 rounded bg-white/5 border border-white/10 text-amber-300 font-semibold text-[11px]';
+            }
+            if (statusDot) {
+              statusDot.className = 'inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]';
+            }
+          }
+        }
 
         if (activeTrack && activeTrack.getPointAtLength) {
           var draw = pathLength * c;
@@ -979,7 +1002,7 @@
         setPhase(bestI);
       }
 
-      // 使用 GSAP ScrollTrigger Pin 釘選舞台，100% 停留在一個視窗大小
+      // 使用 GSAP ScrollTrigger Pin 釘選舞台：精準停留於單一視窗，滾完跑完 6 階段才能繼續往下瀏覽
       var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--ba-header-offset')) ||
                          parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
       var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
@@ -991,12 +1014,21 @@
           pin: true,
           pinSpacing: true,
           start: 'top top+=' + headerOffset,
-          end: isMobileViewport ? '+=2400' : '+=3200',
+          end: isMobileViewport ? '+=2600' : '+=3400',
           scrub: 1.0,
           onUpdate: function (self) {
             onScrollUpdate(self.progress);
           }
         });
+
+        // 關鍵多組件排序與刷新保證：確保此釘選組件在頁面中的順序 100% 正確，絕不提前觸發或跳過
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh();
+
+        setTimeout(function () {
+          ScrollTrigger.sort();
+          ScrollTrigger.refresh();
+        }, 120);
       }
 
       // 初始化第 1 階段
@@ -1041,6 +1073,14 @@
         curIdx = -1;
         setPhase(idx >= 0 ? idx : 0);
         if (typeof ScrollTrigger !== 'undefined') {
+          ScrollTrigger.sort();
+          ScrollTrigger.refresh();
+        }
+      });
+
+      window.addEventListener('load', function () {
+        if (typeof ScrollTrigger !== 'undefined') {
+          ScrollTrigger.sort();
           ScrollTrigger.refresh();
         }
       });
