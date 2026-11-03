@@ -1,22 +1,23 @@
 <!-- =====================================================================
-  BRASS ACOUSTICS // 銅管小號發聲科學 (初學者白話文版 / 完美 RWD 容器適配去背版)
+  BRASS ACOUSTICS // 銅管小號發聲科學 (去背單視窗沉浸版 / Sticky Single-Viewport Embed Edition)
+  - 單視窗鎖定 (Stay in One Viewport)：
+      * 結合 GSAP ScrollTrigger Pin 釘選機制與 100dvh 視窗舞台，在滾動瀏覽時精確「停留在一個視窗大小」。
+      * 滾動滑鼠滾輪時，畫面穩固釘選在螢幕中央，零內層雙滾動條，隨進度流暢畫線並切換 6 大發聲物理階段。
+  - 三欄式/絕對定位混合編排 (黃金比例 4:3:5 舒適排版)：
+      * 左側 [4 欄]：小號剖面聲學透視儀 + 3 組即時聲學遙測數值 HUD（氣流推力、聲音音高、音量大小）。
+      * 中央 [3 欄]：SVG 霓虹向量導軌與即時音訊指針，隨滾輪平滑描邊，6 個可點擊微動效發光節點。
+      * 右側 [5 欄]：CSS Grid 同格疊層圖卡槽 (ba-card-stack)，外框隨內容舒適包覆，雙層光學邊界，零截斷。
   - 初學者白話文教學 (Beginner-Friendly Science)：
-      * 徹底褪去生澀的物理與聲學術語（如「亥姆霍茲共振」、「伯努利自激振盪」、「聲阻抗匹配」等）。
-      * 改以生動生活化比喻（打氣筒吹氣球、小蜜蜂嗡嗡震動、小漏斗聚焦、148cm長管神奇回音、3鍵切換音階、向日葵大喇叭高歌）。
-      * 每一階段皆附「💡 初學秘訣」與「趣味小知識」，讓學生與初學者一目了然、快速吸收！
-  - 完美容器顯示保證 (Guaranteed Display Inside Any <div> Container)：
-      * 內建完備獨立 Scoped CSS，不依賴外部 Tailwind CDN 也能 100% 正常渲染，解決 CDN 延遲或阻擋導致「區塊沒有顯示」的問題。
-      * 初始狀態即具備完整可讀性（Phase 01 預設清晰可見），無需等待滾動觸發即可在任何容器中直接閱讀。
-  - 極致行動端響應式 (Bulletproof Mobile RWD)：
-      * 徹底解決小螢幕 (iPhone SE 375px / 390px / 橫向或低高度視窗) 垂直高度被截斷的問題。
-      * 手機端智慧緊湊化：小號剖面透視儀調優為 68px~80px 緊緻高度，聲學參數整齊並列。
-      * 說明圖卡提供最舒適字級與呼吸內距，標籤在小螢幕自動換行或簡化，零重疊、零截斷。
-      * 底部 HUD 提供極簡直覺按鈕（01 氣流、02 唇振、03 號嘴、04 駐波、05 活塞、06 號口），點擊即瞬切。
-  - 點擊與滾動雙向連動 (Scroll & Click Dual-Mode)：
-      * 在一般頁面可隨滾輪流暢釘選換幕（Scrollytelling）。
-      * 在固定容器或不支援滾動釘選的嵌入區塊中，點擊 HUD 或節點依然能 100% 瞬切換幕與即時插值。
+      * 徹底褪去生澀晦澀的物理公式與學術黑話。
+      * 改以生動生活化比喻（吹氣球蓄力、小蜜蜂嗡嗡拍打、小漏斗聚焦、148cm金屬長管回音、3鍵切換音階、向日葵大喇叭高歌）。
+      * 每一階段皆附「💨 動力來源 / 👄 發聲引擎 / 🎺 任務」與「💡 初學秘訣」，初學者一讀即懂。
+  - 連續聲學遙測動態插值 (Continuous Acoustic Metric Interpolation)：
+      * 滾動時毫秒級平滑插值（lerp）：氣流風壓 (kPa)、共鳴頻率 (Hz + 即時音名標註)、聲壓級 (dB)、管內駐波波動與號口聲波擴散環。
+  - 完美容器適配 (Embed Inside Any <div> Safely)：
+      * 單一根節點架構 (#ba-scrolly-widget)，可直接嵌入宿主網站任意 <div>、文章區塊、網格欄位或 CMS/LMS 容器內。
   - 去背透明背景 (background: transparent)：完美融入宿主網站任意深淺底色。
   - 零 H1/H2/H3 標籤：全數採用階層樣式 <div>，不影響宿主網站 SEO 與大綱層級。
+  - 獨立作用域 Scoped CSS (#ba-scrolly-widget) + :where() 零權重重置，開箱即用無污染。
 ====================================================================== -->
 
 <div id="ba-scrolly-widget" class="ba-widget-root">
@@ -27,7 +28,8 @@
       --ba-amber: #fbbf24;
       --ba-emerald: #34d399;
       --ba-purple: #a855f7;
-      --ba-header-offset: 0px;
+      --ba-gold: #f59e0b;
+      --ba-header-offset: 0px; /* 若外部網站有固定頂部導覽列 (如 60px)，可在此微調 */
       --eo-header-offset: 0px;
       background-color: transparent !important;
       color: #f8fafc;
@@ -42,7 +44,7 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* 零權重重置，避免與宿主網站全域樣式衝突 */
+    /* 使用 :where() 保持 0 權重，避免覆蓋 Tailwind 的 p-* / m-* / mx-auto 等排版留白工具類 */
     :where(#ba-scrolly-widget),
     :where(#ba-scrolly-widget) *,
     :where(#ba-scrolly-widget) *::before,
@@ -62,41 +64,31 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "JetBrains Mono", monospace;
     }
 
-    /* 釘選視窗舞台：高度自適應與彈性邊界保護 */
+    /* 螢幕瀏覽釘選舞台：精確停留在一個視窗大小 (100dvh)，無內部滾動條溢位 */
     #ba-scrolly-widget .ba-stage-viewport {
       position: relative;
       width: 100%;
       height: 100vh;
       height: calc(100dvh - var(--ba-header-offset, var(--eo-header-offset, 0px)));
-      min-height: 480px;
+      min-height: 540px;
       max-height: 1080px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       background: transparent;
-      box-sizing: border-box;
     }
 
-    /* 宿主高度太小時的平滑自適應保護 */
-    @media (max-height: 560px) {
-      #ba-scrolly-widget .ba-stage-viewport {
-        min-height: 420px;
-        height: auto;
-        overflow-y: visible;
-      }
-    }
-
-    /* 微透毛玻璃質感面板 */
+    /* 柔和微透毛玻璃面板 (去背通透感 + 絕佳文字閱讀舒適度) */
     #ba-scrolly-widget .ba-glass-panel {
       background: rgba(15, 23, 42, 0.78);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
     }
 
-    /* 圖卡同格疊層容器 */
+    /* 圖卡同格疊層容器：讓高度依內容自然撐開，邊界永遠貼合不裁切 */
     #ba-scrolly-widget .ba-card-stack {
       display: grid;
       grid-template-columns: 1fr;
@@ -105,24 +97,23 @@
       width: 100%;
     }
 
-    /* 階段說明圖卡：舒適內距、彈性圓角與雙層邊界 */
+    /* 階段說明圖卡：明確定義舒適內距 (padding)，確保文字與邊框擁有充裕呼吸空間 */
     #ba-scrolly-widget .ba-phase-card {
       grid-column: 1 / -1;
       grid-row: 1 / -1;
       width: 100%;
-      padding: 1rem 1.15rem;
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.86);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      transition: border-color 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+      padding: 1.15rem 1.25rem;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
       cursor: pointer;
     }
 
     @media (min-width: 640px) {
       #ba-scrolly-widget .ba-phase-card {
-        padding: 1.35rem 1.6rem;
-        border-radius: 24px;
+        padding: 1.4rem 1.65rem;
       }
     }
 
@@ -132,30 +123,30 @@
       }
     }
 
-    /* 6 個階段柔和主題光學邊界 */
+    /* 各階段專屬柔和光學邊界與環境光暈 */
     #ba-scrolly-widget .ba-phase-card[data-ba-card="0"] {
       border: 1.5px solid rgba(34, 211, 238, 0.45);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 28px -6px rgba(34, 211, 238, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(34, 211, 238, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
     #ba-scrolly-widget .ba-phase-card[data-ba-card="1"] {
       border: 1.5px solid rgba(244, 63, 94, 0.45);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 28px -6px rgba(244, 63, 94, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(244, 63, 94, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
     #ba-scrolly-widget .ba-phase-card[data-ba-card="2"] {
       border: 1.5px solid rgba(251, 191, 36, 0.45);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 28px -6px rgba(251, 191, 36, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(251, 191, 36, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
     #ba-scrolly-widget .ba-phase-card[data-ba-card="3"] {
       border: 1.5px solid rgba(52, 211, 153, 0.45);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 28px -6px rgba(52, 211, 153, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(52, 211, 153, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
     #ba-scrolly-widget .ba-phase-card[data-ba-card="4"] {
       border: 1.5px solid rgba(168, 85, 247, 0.45);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 28px -6px rgba(168, 85, 247, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 32px -6px rgba(168, 85, 247, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
     }
     #ba-scrolly-widget .ba-phase-card[data-ba-card="5"] {
       border: 1.5px solid rgba(245, 158, 11, 0.55);
-      box-shadow: 0 20px 42px -12px rgba(0, 0, 0, 0.65), 0 0 32px -4px rgba(251, 191, 36, 0.28), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+      box-shadow: 0 22px 48px -14px rgba(0, 0, 0, 0.65), 0 0 36px -4px rgba(251, 191, 36, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
     }
 
     #ba-scrolly-widget .ba-phase-card.is-active {
@@ -170,11 +161,11 @@
       opacity: 0 !important;
       visibility: hidden !important;
       pointer-events: none !important;
-      transform: translateY(12px) scale(0.97) !important;
+      transform: translateY(14px) scale(0.97) !important;
       z-index: 0;
     }
 
-    /* SVG 導軌互動節點 */
+    /* SVG 導軌互動節點動效 */
     #ba-scrolly-widget .ba-timeline-node {
       cursor: pointer;
       transform-box: fill-box;
@@ -187,16 +178,16 @@
     #ba-scrolly-widget .ba-timeline-node .node-pulse {
       transform-box: fill-box;
       transform-origin: center;
-      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease, fill 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease, fill 0.3s ease;
     }
 
     #ba-scrolly-widget .ba-timeline-node:hover .node-outer {
-      transform: scale(1.35);
+      transform: scale(1.4);
       stroke: #fbbf24;
     }
 
     #ba-scrolly-widget .ba-timeline-node:hover .node-core {
-      transform: scale(1.25);
+      transform: scale(1.3);
       fill: #ffffff;
     }
 
@@ -210,19 +201,17 @@
       fill: var(--active-color, #fbbf24);
     }
 
-    /* 底部 HUD 切換膠囊按鈕 */
+    /* 底部膠囊 HUD 切換按鈕 */
     #ba-scrolly-widget .ba-hud-btn {
-      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
       cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
     }
 
     #ba-scrolly-widget .ba-hud-btn.is-active {
-      background: rgba(251, 191, 36, 0.18);
+      background: rgba(251, 191, 36, 0.2);
       border-color: rgba(251, 191, 36, 0.85);
       color: #ffffff;
-      box-shadow: 0 0 16px rgba(251, 191, 36, 0.25);
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -236,52 +225,52 @@
     }
   </style>
 
-  <!-- ==================== 釘選核心展示視窗區塊 (停留在一個視窗大小，適配任意 <div> 容器) ==================== -->
+  <!-- ==================== 釘選核心展示視窗區塊 (停留在一個視窗大小 100dvh) ==================== -->
   <section id="ba-pinned-stage" class="ba-stage-viewport select-none">
 
-    <!-- 1. 區塊頂部微型通透進度列 -->
-    <div class="relative z-30 w-full shrink-0 bg-slate-950/50 backdrop-blur-md border-b border-white/10">
+    <!-- 1. 區塊頂部微型通透進度列 (佔高 36px) -->
+    <div class="relative z-30 w-full shrink-0 bg-slate-950/45 backdrop-blur-md border-b border-white/10">
       <div class="relative w-full h-[2px] bg-white/10 overflow-hidden" aria-hidden="true">
         <div id="ba-top-progress-bar" class="w-full h-full origin-left scale-x-0 bg-gradient-to-r from-cyan-400 via-amber-400 to-purple-500 shadow-[0_0_12px_#fbbf24]"></div>
       </div>
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-8 sm:h-9 flex items-center justify-between text-xs ba-font-mono text-slate-300">
-        <div class="flex items-center gap-1.5 sm:gap-2 truncate">
-          <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24] shrink-0"></span>
-          <span class="font-bold text-white text-[11px] sm:text-xs truncate">小號發聲原理 // 初學者的音樂聲學指南</span>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center justify-between text-xs ba-font-mono text-slate-300">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]"></span>
+          <span class="tracking-widest font-bold text-white text-xs">BRASS_ACOUSTICS // 銅管小號發聲科學</span>
         </div>
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-          <span id="ba-header-freq" class="text-amber-400 font-bold text-[11px] sm:text-sm">深呼吸蓄力 (平穩氣流)</span>
-          <div class="px-1.5 sm:px-2 py-0.5 rounded bg-white/5 border border-white/10 text-amber-300 font-semibold text-[10px] sm:text-[11px]">
+        <div class="flex items-center gap-3">
+          <span id="ba-header-freq" class="text-amber-400 font-bold text-xs sm:text-sm">深呼吸蓄力 (平穩氣流)</span>
+          <div class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-amber-300 font-semibold text-[11px]">
             <span id="ba-top-progress-text">000%</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 動態光學氛圍微光暈 (柔和背光，不遮擋宿主網站底色) -->
-    <div id="ba-ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] rounded-full bg-cyan-500/12 blur-[120px] pointer-events-none transition-colors duration-700"></div>
+    <!-- 動態光學氛圍微光暈 (低透明度，不遮擋宿主網站底色) -->
+    <div id="ba-ambient-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[540px] h-[320px] sm:h-[540px] rounded-full bg-cyan-500/12 blur-[130px] pointer-events-none transition-colors duration-700"></div>
 
-    <!-- ==================== 2. 主容器：黃金三欄 / 手機端極致緊湊排版 ==================== -->
-    <div class="relative z-10 max-w-7xl mx-auto w-full flex-1 min-h-0 px-3 sm:px-6 lg:px-8 py-1.5 sm:py-3 flex flex-col justify-center overflow-hidden">
+    <!-- ==================== 2. 主容器：三欄式/絕對定位混合編排 (黃金比例 4:3:5 舒適排版) ==================== -->
+    <div class="relative z-10 max-w-7xl mx-auto w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3.5 flex flex-col justify-center overflow-hidden">
       
-      <!-- 三欄排版：桌機 (左4 + 中3 + 右5) / 行動端直式串接 + 縮小間距防爆版 -->
-      <div class="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 lg:gap-6 items-center">
+      <!-- 三欄主舞台 (桌機橫向 12 欄：左4 + 中3 + 右5 / 行動端背景軌道 + 前景上下舒適聚焦) -->
+      <div class="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4.5 lg:gap-6 items-center">
 
-        <!-- [左側欄 / 4 欄]：小號透視透解儀 + 3 個白話即時指標 -->
-        <div class="relative z-10 lg:col-span-4 flex flex-col gap-1.5 sm:gap-3 justify-center">
+        <!-- [左側欄 / 4 欄]：小號聲學透視儀 + 3 個白話即時指標 -->
+        <div class="relative z-10 lg:col-span-4 flex flex-col gap-2 sm:gap-3 justify-center">
           
-          <!-- 剖面儀表面板 -->
-          <div class="ba-glass-panel rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5">
-            <div class="flex items-center justify-between text-[11px] sm:text-xs ba-font-mono text-slate-300 mb-1.5 sm:mb-2">
+          <!-- 聲學實驗室儀表面板 -->
+          <div class="ba-glass-panel rounded-3xl p-3 sm:p-4">
+            <div class="flex items-center justify-between text-xs ba-font-mono text-slate-300 mb-2">
               <div class="flex items-center gap-1.5 truncate">
-                <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[9px] sm:text-[10px] shrink-0">STEP 01</span>
-                <span id="ba-zone-label" class="text-white font-bold truncate text-[11px] sm:text-xs">步驟 01 // 肚子深吸氣準備動力</span>
+                <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold text-[10px] shrink-0">STEP 01</span>
+                <span id="ba-zone-label" class="text-white font-bold truncate text-xs">步驟 01 // 肚子深吸氣準備動力</span>
               </div>
-              <span id="ba-wave-mode" class="text-cyan-400 font-bold text-[10px] sm:text-xs shrink-0">蓄氣推動</span>
+              <span id="ba-wave-mode" class="text-cyan-400 font-bold text-xs shrink-0">蓄氣推動</span>
             </div>
 
-            <!-- 小號剖面透視 SVG 模擬器 (手機端高度縮減為 64px~76px，桌機 120px) -->
-            <div class="relative w-full h-16 sm:h-20 lg:h-32 rounded-xl sm:rounded-2xl bg-black/65 border border-white/10 overflow-hidden flex items-center justify-center">
+            <!-- 小號剖面透視 SVG 模擬器 (手機端 72px，桌機 125px) -->
+            <div class="relative w-full h-18 sm:h-22 lg:h-32 rounded-2xl bg-black/65 border border-white/10 overflow-hidden flex items-center justify-center">
               <svg class="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="xMidYMid meet">
                 <defs>
                   <linearGradient id="ba-brass-grad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -323,34 +312,34 @@
                 </g>
               </svg>
 
-              <!-- 儀表底部簡短標註 -->
-              <div class="absolute bottom-1 inset-x-2 flex items-center justify-between pointer-events-none text-[8px] sm:text-[10px] ba-font-mono">
-                <span class="px-1 py-0.5 rounded bg-black/70 text-cyan-300 border border-white/10">小號長度: 148cm</span>
-                <span id="ba-status-tag" class="px-1 py-0.5 rounded bg-black/70 text-amber-300 font-semibold border border-white/10 truncate max-w-[170px] sm:max-w-[220px]">動力來源: 腹部深呼吸</span>
+              <!-- 儀表底部標註 -->
+              <div class="absolute bottom-1 inset-x-2 flex items-center justify-between pointer-events-none text-[9px] sm:text-[10px] ba-font-mono">
+                <span class="px-1.5 py-0.5 rounded bg-black/65 text-cyan-300 border border-white/10">長度: 148cm</span>
+                <span id="ba-status-tag" class="px-1.5 py-0.5 rounded bg-black/65 text-amber-300 font-semibold border border-white/10 truncate max-w-[190px] sm:max-w-[230px]">動力來源: 腹部深呼吸</span>
               </div>
             </div>
           </div>
 
-          <!-- 白話參數數值 HUD -->
-          <div class="grid grid-cols-3 gap-1 sm:gap-2 ba-font-mono text-center">
-            <div class="ba-glass-panel py-1.5 px-1 sm:py-2 sm:px-2 rounded-xl sm:rounded-2xl">
-              <div class="text-[8px] sm:text-[10px] text-slate-400 font-bold">氣流推力</div>
-              <div id="ba-metric-pressure" class="text-xs sm:text-sm lg:text-base font-bold text-cyan-400 mt-0.5">3.2 kPa</div>
+          <!-- 即時聲學參數遙測 HUD -->
+          <div class="grid grid-cols-3 gap-1.5 sm:gap-2.5 ba-font-mono text-center">
+            <div class="ba-glass-panel py-2 px-1 sm:py-2.5 sm:px-2 rounded-2xl">
+              <div class="text-[9px] sm:text-[10px] text-slate-400 font-bold">氣流推力</div>
+              <div id="ba-metric-pressure" class="text-xs sm:text-base lg:text-lg font-bold text-cyan-400 mt-0.5">3.2 kPa</div>
             </div>
-            <div class="ba-glass-panel py-1.5 px-1 sm:py-2 sm:px-2 rounded-xl sm:rounded-2xl">
-              <div class="text-[8px] sm:text-[10px] text-slate-400 font-bold">聲音音高</div>
-              <div id="ba-metric-freq" class="text-xs sm:text-sm lg:text-base font-bold text-amber-400 mt-0.5">0 Hz</div>
+            <div class="ba-glass-panel py-2 px-1 sm:py-2.5 sm:px-2 rounded-2xl">
+              <div class="text-[9px] sm:text-[10px] text-slate-400 font-bold">聲音音高</div>
+              <div id="ba-metric-freq" class="text-xs sm:text-base lg:text-lg font-bold text-amber-400 mt-0.5">0 Hz</div>
             </div>
-            <div class="ba-glass-panel py-1.5 px-1 sm:py-2 sm:px-2 rounded-xl sm:rounded-2xl">
-              <div class="text-[8px] sm:text-[10px] text-slate-400 font-bold">音量大小</div>
-              <div id="ba-metric-spl" class="text-xs sm:text-sm lg:text-base font-bold text-purple-400 mt-0.5">45 dB</div>
+            <div class="ba-glass-panel py-2 px-1 sm:py-2.5 sm:px-2 rounded-2xl">
+              <div class="text-[9px] sm:text-[10px] text-slate-400 font-bold">音量大小</div>
+              <div id="ba-metric-spl" class="text-xs sm:text-base lg:text-lg font-bold text-purple-400 mt-0.5">45 dB</div>
             </div>
           </div>
         </div>
 
-        <!-- [中央欄 / 3 欄]：SVG 平滑向量曲線導軌 (桌機置中獨立 / 行動端化為背景微透軌道不佔高度) -->
-        <div class="absolute inset-0 opacity-15 pointer-events-none lg:static lg:opacity-100 lg:col-span-3 lg:h-[400px] flex items-center justify-center">
-          <svg id="ba-timeline-svg" class="w-full h-full max-h-[400px] lg:pointer-events-auto" viewBox="0 0 400 650" preserveAspectRatio="xMidYMid meet">
+        <!-- [中央欄 / 3 欄]：SVG 平滑向量曲線導軌 (桌機置中獨立欄 / 行動端化為微透背景軌道不佔垂直高度) -->
+        <div class="absolute inset-0 opacity-20 pointer-events-none lg:static lg:opacity-100 lg:col-span-3 lg:h-[420px] flex items-center justify-center">
+          <svg id="ba-timeline-svg" class="w-full h-full max-h-[420px] lg:pointer-events-auto" viewBox="0 0 400 650" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="ba-neon-grad" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%" stop-color="#22d3ee" />
@@ -371,7 +360,7 @@
               </filter>
             </defs>
 
-            <!-- 參考中心垂直線 -->
+            <!-- 垂直參考座標線 -->
             <line x1="200" y1="25" x2="200" y2="625" stroke="rgba(255,255,255,0.08)" stroke-dasharray="4 6" stroke-width="1" />
 
             <!-- 1. 靜態底軌 -->
@@ -380,49 +369,49 @@
             <!-- 2. 動態描邊軌 -->
             <path id="ba-svg-active-track" d="M 200 45 C 85 95, 85 135, 145 155 C 235 185, 315 215, 255 265 C 195 315, 95 335, 145 375 C 195 415, 315 445, 255 490 C 195 535, 140 565, 200 605" fill="none" stroke="url(#ba-neon-grad)" stroke-width="5" stroke-linecap="round" filter="url(#ba-neon-glow)" />
 
-            <!-- 隨曲線移動的指針 -->
+            <!-- 隨曲線移動的即時音訊指針 -->
             <g id="ba-svg-playhead" transform="translate(200, 45)">
               <circle r="12" fill="rgba(251, 191, 36, 0.2)" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3 3" />
               <circle r="5" fill="#ffffff" filter="url(#ba-neon-glow)" />
             </g>
 
-            <!-- 6 個可點擊跳轉的 SVG 節點 -->
-            <g class="ba-timeline-node is-active" data-ba-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="切換至第 1 階段：氣流動力">
+            <!-- 6 個可互動 SVG 階段節點 -->
+            <g class="ba-timeline-node is-active" data-ba-phase="0" style="--active-color: #22d3ee;" role="button" tabindex="0" aria-label="跳轉至 Phase 01: 氣流動力">
               <circle class="node-pulse" cx="200" cy="45" r="22" fill="rgba(34, 211, 238, 0.15)" />
               <circle class="node-outer" cx="200" cy="45" r="11" fill="#020617" stroke="#22d3ee" stroke-width="3" filter="url(#ba-neon-glow)" />
               <circle class="node-core" cx="200" cy="45" r="4.5" fill="#22d3ee" />
               <text x="220" y="50" fill="#22d3ee" font-family="ui-monospace, monospace" font-size="11" font-weight="700">01 // 氣流</text>
             </g>
 
-            <g class="ba-timeline-node" data-ba-phase="1" style="--active-color: #f43f5e;" role="button" tabindex="0" aria-label="切換至第 2 階段：嘴唇震動">
+            <g class="ba-timeline-node" data-ba-phase="1" style="--active-color: #f43f5e;" role="button" tabindex="0" aria-label="跳轉至 Phase 02: 嘴唇震動">
               <circle class="node-pulse" cx="145" cy="155" r="22" fill="rgba(244, 63, 94, 0.12)" />
               <circle class="node-outer" cx="145" cy="155" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="145" cy="155" r="4.5" fill="#94a3b8" />
               <text x="56" y="160" fill="#fb7185" font-family="ui-monospace, monospace" font-size="11" font-weight="700">02 // 唇振</text>
             </g>
 
-            <g class="ba-timeline-node" data-ba-phase="2" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="切換至第 3 階段：號嘴聚焦">
+            <g class="ba-timeline-node" data-ba-phase="2" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="跳轉至 Phase 03: 號嘴聚焦">
               <circle class="node-pulse" cx="255" cy="265" r="22" fill="rgba(251, 191, 36, 0.12)" />
               <circle class="node-outer" cx="255" cy="265" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="255" cy="265" r="4.5" fill="#94a3b8" />
               <text x="275" y="270" fill="#fbbf24" font-family="ui-monospace, monospace" font-size="11" font-weight="700">03 // 號嘴</text>
             </g>
 
-            <g class="ba-timeline-node" data-ba-phase="3" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="切換至第 4 階段：長管共鳴">
+            <g class="ba-timeline-node" data-ba-phase="3" style="--active-color: #34d399;" role="button" tabindex="0" aria-label="跳轉至 Phase 04: 長管共鳴">
               <circle class="node-pulse" cx="145" cy="375" r="22" fill="rgba(52, 211, 153, 0.12)" />
               <circle class="node-outer" cx="145" cy="375" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="145" cy="375" r="4.5" fill="#94a3b8" />
               <text x="56" y="380" fill="#34d399" font-family="ui-monospace, monospace" font-size="11" font-weight="700">04 // 共鳴</text>
             </g>
 
-            <g class="ba-timeline-node" data-ba-phase="4" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="切換至第 5 階段：按鍵變調">
+            <g class="ba-timeline-node" data-ba-phase="4" style="--active-color: #a855f7;" role="button" tabindex="0" aria-label="跳轉至 Phase 05: 活塞變調">
               <circle class="node-pulse" cx="255" cy="490" r="22" fill="rgba(168, 85, 247, 0.12)" />
               <circle class="node-outer" cx="255" cy="490" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="255" cy="490" r="4.5" fill="#94a3b8" />
               <text x="275" y="495" fill="#c084fc" font-family="ui-monospace, monospace" font-size="11" font-weight="700">05 // 活塞</text>
             </g>
 
-            <g class="ba-timeline-node" data-ba-phase="5" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="切換至第 6 階段：喇叭綻放">
+            <g class="ba-timeline-node" data-ba-phase="5" style="--active-color: #fbbf24;" role="button" tabindex="0" aria-label="跳轉至 Phase 06: 喇叭綻放">
               <circle class="node-pulse" cx="200" cy="605" r="22" fill="rgba(251, 191, 36, 0.15)" />
               <circle class="node-outer" cx="200" cy="605" r="11" fill="#020617" stroke="#475569" stroke-width="3" />
               <circle class="node-core" cx="200" cy="605" r="4.5" fill="#94a3b8" />
@@ -431,178 +420,178 @@
           </svg>
         </div>
 
-        <!-- [右側欄 / 5 欄]：初學者白話文圖卡疊層 (Grid 同格自動撐開，零裁切) -->
+        <!-- [右側欄 / 5 欄]：單一焦點 6 階段說明圖卡槽 (Grid 同格自適應包覆：舒適留白、行高 1.8、雙層柔和邊界) -->
         <div class="relative z-10 lg:col-span-5 ba-card-stack">
 
           <!-- PHASE 01 -->
-          <div data-ba-card="0" class="ba-phase-card is-active flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="0" class="ba-phase-card is-active flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
                   <span>PHASE 01 — 氣流動力源</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-cyan-400 font-bold">01</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 深吸一口氣，蓄積滿滿的氣體推力
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 吹小號不是死命用嘴巴吹氣，而是用肚子（腹式呼吸）把氣吸飽。就像幫氣球充飽氣一樣，肚子保持穩定推力，把空氣平穩又集中地推向嘴邊，這就是讓整支小號唱出響亮聲音的動力引擎！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-cyan-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-cyan-200/90 flex items-center gap-1.5">
                 <span class="text-cyan-400 font-bold">💨 動力來源</span> 腹部深呼吸平穩推氣
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-cyan-500/10 border border-cyan-400/20 text-cyan-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-400/20 text-cyan-200/90 flex items-center gap-1.5">
                 <span class="text-cyan-400 font-bold">💡 初學秘訣</span> 肩膀放鬆不聳起，腹部自然鼓起
               </span>
             </div>
           </div>
 
           <!-- PHASE 02 -->
-          <div data-ba-card="1" class="ba-phase-card flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="1" class="ba-phase-card flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-400/30">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-rose-500/15 text-rose-300 border border-rose-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shadow-[0_0_8px_#f43f5e]"></span>
                   <span>PHASE 02 — 嘴唇快速震動</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-rose-400 font-bold">02</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 嘴唇放鬆微閉，像小蜜蜂嗡嗡叫
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 小號本身沒有木頭簧片，發聲的其實是你的「雙唇」！當氣流衝過微閉的雙唇時，嘴唇會快速拍打震動，發出像蜜蜂一樣「噗～嗡嗡～」的聲音（稱為 Buzzing）。嘴唇收得越緊，震動就越快，音調就越高！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-rose-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-rose-200/90 flex items-center gap-1.5">
                 <span class="text-rose-400 font-bold">👄 發聲引擎</span> 嘴唇拍打震動 (Buzzing)
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-rose-500/10 border border-rose-400/20 text-rose-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-400/20 text-rose-200/90 flex items-center gap-1.5">
                 <span class="text-rose-400 font-bold">💡 初學秘訣</span> 嘴角收緊固定，中央嘴唇保持放鬆
               </span>
             </div>
           </div>
 
           <!-- PHASE 03 -->
-          <div data-ba-card="2" class="ba-phase-card flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="2" class="ba-phase-card flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/30">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
                   <span>PHASE 03 — 號嘴聚焦聲音</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-amber-400 font-bold">03</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 戴上小漏斗號嘴，把微小震動聚焦放大
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 單用嘴唇發出的嗡嗡聲其實很小又散。金屬號嘴（Mouthpiece）就像一個小漏斗，把嘴唇拍打出來的微弱震動牢牢收集在圓碗（杯部）裡，穿過中間狹窄細孔高速加壓，整齊乾淨地送進小號長管裡！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-amber-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-amber-200/90 flex items-center gap-1.5">
                 <span class="text-amber-400 font-bold">🎺 號嘴任務</span> 收集散亂震動並高速聚焦
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-amber-500/10 border border-amber-400/20 text-amber-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/20 text-amber-200/90 flex items-center gap-1.5">
                 <span class="text-amber-400 font-bold">💡 初學秘訣</span> 號嘴輕貼嘴唇，切忌死命用力壓牙齒
               </span>
             </div>
           </div>
 
           <!-- PHASE 04 -->
-          <div data-ba-card="3" class="ba-phase-card flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="3" class="ba-phase-card flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
                   <span>PHASE 04 — 長管神奇共鳴</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-emerald-400 font-bold">04</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 148 公分金色長管，產生渾厚宏亮共鳴
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 把小號彎彎曲曲的管子拉直，足足有 148 公分長！聲音進到管子後，會在金屬管壁之間來回反彈回響（產生共鳴）。就算一顆按鍵都不按，光靠改變嘴唇緊度和氣速，就能吹出「Do、Sol、高音Do」等自然階梯音階！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-emerald-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-emerald-200/90 flex items-center gap-1.5">
                 <span class="text-emerald-400 font-bold">〰️ 長管魔法</span> 148cm 金屬回音通道
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-emerald-500/10 border border-emerald-400/20 text-emerald-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-400/20 text-emerald-200/90 flex items-center gap-1.5">
                 <span class="text-emerald-400 font-bold">💡 初學秘訣</span> 不按鍵也能換音高，就像古代軍號吹法
               </span>
             </div>
           </div>
 
           <!-- PHASE 05 -->
-          <div data-ba-card="4" class="ba-phase-card flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="4" class="ba-phase-card flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-400/30">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-400/30">
                   <span class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_#a855f7]"></span>
-                  <span>PHASE 05 — 活塞按鍵切換音階</span>
+                  <span>PHASE 05 — 活塞按鍵變調</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-purple-400 font-bold">05</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 靈活的三顆活塞鍵，管子長度隨你變換
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 小號只有 3 顆活塞按鍵。每按下一顆鍵，管子裡的氣道就會切換，讓聲音繞去旁邊的小彎管：按第 2 鍵管子變長一點（降半音）、按第 1 鍵變更長（降全音）。透過這 3 顆按鍵的 7 種指法搭配，就能吹出所有的音樂旋律！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-purple-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-purple-200/90 flex items-center gap-1.5">
                 <span class="text-purple-400 font-bold">🎹 按鍵規則</span> 管子越長聲音越低，放開聲音變高
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-purple-500/10 border border-purple-400/20 text-purple-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-400/20 text-purple-200/90 flex items-center gap-1.5">
                 <span class="text-purple-400 font-bold">💡 初學秘訣</span> 手指指腹垂直貼鍵，動作輕盈像彈鋼琴
               </span>
             </div>
           </div>
 
           <!-- PHASE 06 -->
-          <div data-ba-card="5" class="ba-phase-card flex flex-col justify-between" title="點擊切換至此階段">
+          <div data-ba-card="5" class="ba-phase-card flex flex-col justify-between" title="點擊捲動鎖定至此階段">
             <div>
-              <div class="flex items-center justify-between gap-2 mb-2 sm:mb-2.5">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[11px] sm:text-xs ba-font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
+              <div class="flex items-center justify-between gap-3 mb-2.5 sm:mb-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ba-font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40">
                   <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]"></span>
-                  <span>PHASE 06 — 喇叭口高歌綻放</span>
+                  <span>PHASE 06 — 喇叭高歌綻放</span>
                 </div>
-                <div class="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-[10px] sm:text-xs font-semibold">
+                <div class="px-2.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300 ba-font-mono text-xs font-semibold">
                   <span class="text-amber-400 font-bold">06</span> / 06
                 </div>
               </div>
-              <div class="text-base sm:text-xl lg:text-2xl font-black text-white tracking-normal leading-snug">
+              <div class="text-lg sm:text-2xl font-black text-white tracking-normal leading-snug">
                 向日葵般展開的大喇叭，綻放黃金音色
               </div>
-              <p class="mt-1.5 sm:mt-2.5 text-xs sm:text-sm text-slate-100/90 leading-[1.65] sm:leading-[1.75]">
+              <p class="mt-2.5 sm:mt-3 text-sm sm:text-[15px] text-slate-100/95 leading-[1.75] sm:leading-[1.8] tracking-[0.015em]">
                 小號末端像花朵一樣大大展開的喇叭口（號口），就是天然的高效擴音器！它把管子裡面原本悶悶的聲音，順順地放大並散播到整個空間中。這也是為什麼小號在管弦樂團或爵士樂隊裡，聲音總是那麼明亮、帥氣、充滿感染力！
               </p>
             </div>
-            <div class="mt-2.5 sm:mt-3 pt-2 sm:pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs ba-font-mono">
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-white/5 border border-white/10 text-amber-200/90 flex items-center gap-1">
+            <div class="mt-3.5 sm:mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center gap-2 text-xs ba-font-mono">
+              <span class="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-amber-200/90 flex items-center gap-1.5">
                 <span class="text-amber-400 font-bold">🌟 擴音魔法</span> 天然黃銅大聲公，音量穿透全場
               </span>
-              <span class="px-2 py-0.5 sm:py-1 rounded-md bg-amber-500/15 border border-amber-400/30 text-amber-200/90 flex items-center gap-1">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-400/30 text-amber-200/90 flex items-center gap-1.5">
                 <span class="text-amber-400 font-bold">💡 初學秘訣</span> 號口朝前微揚，把音色完整傳遞給聽眾
               </span>
             </div>
@@ -613,35 +602,35 @@
       </div>
     </div>
 
-    <!-- 3. 底部浮動 6 階段 HUD 快捷切換導覽列 (精簡按鈕排版，手機端顯示清晰短標) -->
-    <nav aria-label="小號發聲階段快捷切換導覽" class="relative z-30 shrink-0 w-full max-w-3xl mx-auto px-2 sm:px-4 pb-1.5 sm:pb-2.5">
-      <div class="ba-glass-panel p-1 sm:p-1.5 rounded-xl sm:rounded-2xl grid grid-cols-6 gap-0.5 sm:gap-1.5 shadow-xl">
-        <button type="button" data-ba-hud="0" class="ba-hud-btn is-active py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-center ba-font-mono flex flex-col items-center">
+    <!-- 3. 底部浮動 6 階段 HUD 快捷切換導覽列 (佔高約 50px，置底防遮擋) -->
+    <nav aria-label="小號發聲階段快捷切換導覽" class="relative z-30 shrink-0 w-full max-w-3xl mx-auto px-3 sm:px-4 pb-2 sm:pb-3">
+      <div class="ba-glass-panel p-1.5 rounded-2xl grid grid-cols-6 gap-1 sm:gap-1.5 shadow-2xl">
+        <button type="button" data-ba-hud="0" class="ba-hud-btn is-active py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-cyan-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>01</span>
           <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full text-white">氣流</span>
         </button>
 
-        <button type="button" data-ba-hud="1" class="ba-hud-btn py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
+        <button type="button" data-ba-hud="1" class="ba-hud-btn py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-rose-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>02</span>
           <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">唇振</span>
         </button>
 
-        <button type="button" data-ba-hud="2" class="ba-hud-btn py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
+        <button type="button" data-ba-hud="2" class="ba-hud-btn py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-amber-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>03</span>
           <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">號嘴</span>
         </button>
 
-        <button type="button" data-ba-hud="3" class="ba-hud-btn py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
+        <button type="button" data-ba-hud="3" class="ba-hud-btn py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-emerald-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>04</span>
-          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">駐波</span>
+          <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">共鳴</span>
         </button>
 
-        <button type="button" data-ba-hud="4" class="ba-hud-btn py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
+        <button type="button" data-ba-hud="4" class="ba-hud-btn py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-purple-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>05</span>
           <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">活塞</span>
         </button>
 
-        <button type="button" data-ba-hud="5" class="ba-hud-btn py-1 sm:py-1.5 px-0.5 rounded-lg sm:rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
+        <button type="button" data-ba-hud="5" class="ba-hud-btn py-1.5 px-0.5 sm:px-1 rounded-xl border border-transparent text-slate-400 hover:text-slate-200 text-center ba-font-mono flex flex-col items-center">
           <span class="text-[8px] sm:text-[9px] text-amber-400 font-bold truncate max-w-full"><span class="hidden sm:inline">PHASE </span>06</span>
           <span class="text-[10px] sm:text-xs font-bold mt-0.5 truncate w-full">號口</span>
         </button>
@@ -663,10 +652,7 @@
         var s = document.createElement('script');
         s.src = src;
         s.onload = resolve;
-        s.onerror = function () {
-          // 若 CDN 載入失敗（如離線或網路防火牆），不拋出未捕獲錯誤，讓本體依然維持預設顯示
-          resolve();
-        };
+        s.onerror = function () { resolve(); };
         document.head.appendChild(s);
       });
     }
@@ -708,7 +694,7 @@
         }
       }
 
-      // 初學者白話文聲學階段資料
+      // 初學者白話文 6 大階段資料
       var phases = [
         {
           zone: '步驟 01 // 肚子深吸氣準備動力',
@@ -839,7 +825,7 @@
         ratios[0] = 0; ratios[5] = 1;
       }
 
-      // 連續聲學遙測插值 (Acoustic Metric Interpolation)
+      // 毫秒級平滑插值演算法 (Continuous Acoustic Metric Interpolation)
       function interpolateMetrics(progress) {
         var clamped = Math.max(0, Math.min(1, progress));
         var segIndex = 0;
@@ -879,7 +865,7 @@
         if (statusTag) statusTag.textContent = d.status;
 
         if (ambientGlow) {
-          ambientGlow.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] rounded-full blur-[120px] pointer-events-none transition-colors duration-700 ' + d.glowClass;
+          ambientGlow.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[540px] h-[320px] sm:h-[540px] rounded-full blur-[130px] pointer-events-none transition-colors duration-700 ' + d.glowClass;
         }
 
         ['ba-part-breath','ba-part-mouthpiece','ba-part-bore','ba-part-valves','ba-part-bell'].forEach(function (id) {
@@ -914,7 +900,7 @@
                 opacity: 1,
                 scale: 1,
                 y: 0,
-                duration: 0.35,
+                duration: 0.38,
                 ease: 'power3.out',
                 overwrite: 'auto'
               });
@@ -928,8 +914,8 @@
               gsap.to(c, {
                 opacity: 0,
                 scale: 0.97,
-                y: 12,
-                duration: 0.28,
+                y: 14,
+                duration: 0.3,
                 ease: 'power2.out',
                 overwrite: 'auto'
               });
@@ -963,7 +949,7 @@
           if (playhead) playhead.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ')');
         }
 
-        // 連續數值動態更新
+        // 連續數值動態更新 (lerp)
         var interp = interpolateMetrics(c);
         if (mPressure) mPressure.textContent = interp.pressure;
         if (mFreq) mFreq.textContent = interp.freq;
@@ -993,6 +979,7 @@
         setPhase(bestI);
       }
 
+      // 使用 GSAP ScrollTrigger Pin 釘選舞台，100% 停留在一個視窗大小
       var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--ba-header-offset')) ||
                          parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
       var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
@@ -1004,7 +991,7 @@
           pin: true,
           pinSpacing: true,
           start: 'top top+=' + headerOffset,
-          end: isMobileViewport ? '+=2000' : '+=2800',
+          end: isMobileViewport ? '+=2400' : '+=3200',
           scrub: 1.0,
           onUpdate: function (self) {
             onScrollUpdate(self.progress);
@@ -1022,11 +1009,10 @@
           var targetScrollY = mainScrollTrigger.start + (mainScrollTrigger.end - mainScrollTrigger.start) * targetRatio;
           gsap.to(window, {
             scrollTo: { y: targetScrollY, autoKill: false },
-            duration: 0.85,
+            duration: 0.9,
             ease: 'power3.inOut'
           });
         } else {
-          // 當沒有外部滾輪釘選時，直接瞬切至目標階段
           onScrollUpdate(targetRatio);
           setPhase(phaseIndex);
         }
