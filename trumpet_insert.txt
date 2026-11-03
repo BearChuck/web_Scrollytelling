@@ -1,31 +1,37 @@
 <!-- =====================================================================
-  BRASS ACOUSTICS // 銅管小號發聲科學 (高可靠嵌入版 / Bulletproof Embed Edition)
+  BRASS ACOUSTICS // 銅管小號發聲科學 (會員專屬／付費解鎖高可靠嵌入版)
+  - 👑 會員專屬／付費解鎖 (Duda Private Access & Membership Support)：
+      * 完美相容 Duda / MA WebCenters 全域權限系統 (支援 class="private-only" 或 "private-*")。
+      * 內建「零尺寸動態喚醒引擎」(Dynamic Visibility & Zero-Height Auto-Wakeup)：
+        當未登入或尚未開通時，若宿主環境將區塊設為 display: none，GSAP 會暫緩初始化；
+        一旦會員登入或通過 Firebase Auth 權限解鎖 (變為 display: block)，
+        內建的 ResizeObserver 與 MutationObserver 會在 0.1 秒內自動激活，
+        精確重算 SVG 軌道總長度 (pathLength) 並完成 ScrollTrigger 釘選刷新，絕不卡死、絕不破版！
+      * 支援 Duda 編輯器排版模式 (window.__isDudaEditor)：在編輯器內強制維持 100% 視覺顯示以利排版。
   - 跑完滾完動畫才能繼續往下瀏覽 (Locked Single-Viewport Scrollytelling)：
       * 結合 GSAP ScrollTrigger Pin 釘選與 pinSpacing 佔位機制。
       * 當螢幕滾動至本區塊時，畫面精確鎖定於目前視窗（100dvh），使用者必須隨滾輪依序經歷 6 大發聲物理階段（0% ➔ 100%）。
       * 滾動期間中央 SVG 曲線平滑畫線、音訊指針位移、管內駐波即時形變、聲學數據毫秒級插值（Lerp）。
       * 只有當 6 階段完整播放完畢（Progress 達到 100%），畫面才會平滑解鎖，讓使用者順暢繼續往下瀏覽後續內容！
   - 徹底解決「多組件同頁載入競爭」與「鎖不住」問題 (Race-Condition Free Dependency Loader)：
-      * 舊版若是同一頁面貼上兩份不同時間軸，第二個組件會誤判外部 JS 已下載完成而草率執行，導致 GSAP 釘選未初始化。
-      * 全新採用依賴就緒監聽佇列 (waitForDependencies)，100% 確保 window.gsap 與 ScrollTrigger 真正可用後才啟動釘選。
+      * 採用依賴就緒監聽佇列 (waitForDependencies)，100% 確保 window.gsap 與 ScrollTrigger 真正可用後才啟動釘選。
       * 啟動後自動執行 ScrollTrigger.sort() 與二次智慧刷新，精確校準垂直觸發起點。
   - 零依賴獨立 Scoped CSS 防禦 (Pure Scoped Layout Protection)：
-      * 內建完備的 4:3:5 三欄 Grid 與 Flex 原生樣式，即便宿主網站完全沒有 Tailwind 或網路延遲，
-        版面結構依然 100% 穩固，絕不縮扁、絕不位移、絕不破版！
+      * 內建完備的 4:3:5 三欄 Grid 與 Flex 原生樣式，即便宿主網站完全沒有 Tailwind，版面依然穩固。
   - 初學者白話文教學 (Beginner-Friendly Science)：
-      * 徹底褪去生澀晦澀的物理公式與學術黑話。
       * 改以生動生活化比喻（吹氣球蓄力、小蜜蜂嗡嗡拍打、小漏斗聚焦、148cm金屬長管回音、3鍵切換音階、向日葵大喇叭高歌）。
       * 每一階段皆附「💨 動力來源 / 👄 發聲引擎 / 🎺 任務」與「💡 初學秘訣」，初學者一讀即懂。
   - 去背透明背景 (background: transparent)：完美融入宿主網站任意深淺底色。
-  - 零 H1/H2/H3 標籤：全數採用階層樣式 <div>，不影響宿主網站 SEO 與大綱層級。
 
   ======================================================================
-  ⚠️ 外部網站 / 父容器嵌入注意事項 (Host Container Guidelines)：
-  1. 父容器千萬不要加上 overflow: hidden 或 overflow: clip！
-     (CSS 規範：父層一旦有 overflow:hidden 或 transform，會攔截 position:fixed，導致釘選脫軌無法鎖住)。
-  2. 父容器的高度請設為 height: auto (不要寫死固定高度如 height: 600px)，
-     (釘選動畫需要滾動空間讓 pinSpacing 自然撐開，寫死高度會導致動畫無法滾動或內部雙滾軸)。
-  3. 父層容器請避免加入 CSS transform、filter、perspective 或 contain: paint。
+  ⚠️ 會員專屬／付費解鎖嵌入指南 (Membership Guidelines)：
+  1. 若您希望透過 Duda 全域腳本進行權限控制：
+     - 在外層容器加上 class="private-only" (所有開通會員可見) 或 class="private-trumpet" (特定方案標籤)。
+     - 💡 請注意 Duda 全域腳本規則：登入使用者的 Firestore roles 需至少包含一項標籤
+       (如 roles: ['private-only'] 或 roles: ['student']) 或帳號屬於管理員信箱，才會判定為已解鎖。
+  2. 父容器注意事項：
+     - 父容器請設為 height: auto (不要寫死高度如 height: 600px)。
+     - 父容器千萬不要加上 overflow: hidden 或 transform，以確保 GSAP position:fixed 正常釘選。
   ====================================================================== -->
 
 <div id="ba-scrolly-widget" class="ba-widget-root">
@@ -268,6 +274,7 @@
         <div class="flex items-center gap-2">
           <span id="ba-status-dot" class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_#fbbf24]"></span>
           <span class="tracking-widest font-bold text-white text-xs">BRASS_ACOUSTICS // 銅管小號發聲科學</span>
+          <span id="ba-vip-badge" class="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold tracking-wide">👑 VIP 專屬</span>
         </div>
         <div class="flex items-center gap-3">
           <span id="ba-header-freq" class="text-amber-400 font-bold text-xs sm:text-sm">深呼吸蓄力 (平穩氣流)</span>
@@ -859,27 +866,40 @@
       var huds = root.querySelectorAll('[data-ba-hud]');
 
       var pathLength = 600;
-      if (activeTrack && activeTrack.getTotalLength) {
-        pathLength = activeTrack.getTotalLength();
-        activeTrack.style.strokeDasharray = String(pathLength);
-        activeTrack.style.strokeDashoffset = String(pathLength);
-      }
-
       var targets = [{x:200,y:45},{x:145,y:155},{x:255,y:265},{x:145,y:375},{x:255,y:490},{x:200,y:605}];
       var ratios = [0, 0.2, 0.4, 0.6, 0.8, 1];
-      if (activeTrack && activeTrack.getPointAtLength) {
-        ratios = targets.map(function (t) {
-          var best = 0, minD = Infinity;
-          for (var i = 0; i <= 400; i++) {
-            var l = (i / 400) * pathLength;
-            var p = activeTrack.getPointAtLength(l);
-            var d = Math.hypot(p.x - t.x, p.y - t.y);
-            if (d < minD) { minD = d; best = l; }
+
+      // 安全長度量測函式 (防禦 display: none 時的 SVG 零尺寸與 NaN 例外)
+      function updatePathMeasurements() {
+        if (!activeTrack || typeof activeTrack.getTotalLength !== 'function') return false;
+        try {
+          var len = activeTrack.getTotalLength();
+          if (!len || isNaN(len) || len <= 20) {
+            return false; // 目前處於隱藏狀態 (display: none)，SVG 尺寸為 0
           }
-          return best / pathLength;
-        });
-        ratios[0] = 0; ratios[5] = 1;
+          pathLength = len;
+          activeTrack.style.strokeDasharray = String(pathLength);
+          activeTrack.style.strokeDashoffset = String(pathLength);
+
+          if (activeTrack.getPointAtLength) {
+            ratios = targets.map(function (t) {
+              var best = 0, minD = Infinity;
+              for (var i = 0; i <= 400; i++) {
+                var l = (i / 400) * pathLength;
+                var p = activeTrack.getPointAtLength(l);
+                var d = Math.hypot(p.x - t.x, p.y - t.y);
+                if (d < minD) { minD = d; best = l; }
+              }
+              return best / pathLength;
+            });
+            ratios[0] = 0; ratios[5] = 1;
+          }
+          return true;
+        } catch (e) {
+          return false;
+        }
       }
+      updatePathMeasurements();
 
       // 毫秒級平滑插值演算法 (Continuous Acoustic Metric Interpolation)
       function interpolateMetrics(progress) {
@@ -1056,33 +1076,100 @@
       }
 
       // 使用 GSAP ScrollTrigger Pin 釘選舞台：精準停留於單一視窗，滾完跑完 6 階段才能繼續往下瀏覽
-      var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--ba-header-offset')) ||
-                         parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
-      var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
-
       var mainScrollTrigger = null;
-      if (hasGsap && hasScrollTrigger && stage) {
-        mainScrollTrigger = ScrollTrigger.create({
-          trigger: stage,
-          pin: true,
-          pinSpacing: true,
-          start: 'top top+=' + headerOffset,
-          end: isMobileViewport ? '+=2600' : '+=3400',
-          scrub: 1.0,
-          onUpdate: function (self) {
-            onScrollUpdate(self.progress);
+
+      function initOrRefreshScrollTrigger() {
+        if (!stage) return false;
+        var rect = stage.getBoundingClientRect();
+        // 若寬度或高度為 0，代表目前處於 Duda private-only 隱藏狀態，暫緩初始化
+        if (rect.width === 0 || rect.height === 0 || stage.offsetWidth === 0) {
+          return false;
+        }
+
+        updatePathMeasurements();
+
+        if (hasGsap && hasScrollTrigger) {
+          var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--ba-header-offset')) ||
+                             parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
+          var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
+
+          if (!mainScrollTrigger) {
+            mainScrollTrigger = ScrollTrigger.create({
+              trigger: stage,
+              pin: true,
+              pinSpacing: true,
+              start: 'top top+=' + headerOffset,
+              end: isMobileViewport ? '+=2600' : '+=3400',
+              scrub: 1.0,
+              onUpdate: function (self) {
+                onScrollUpdate(self.progress);
+              }
+            });
           }
-        });
 
-        // 確保此釘選組件在頁面中的順序 100% 正確
-        ScrollTrigger.sort();
-        ScrollTrigger.refresh();
-
-        setTimeout(function () {
           ScrollTrigger.sort();
           ScrollTrigger.refresh();
-        }, 150);
+        }
+
+        onScrollUpdate(mainScrollTrigger ? mainScrollTrigger.progress : 0);
+        return true;
       }
+
+      // 動態解鎖與能見度監聽引擎 (專為 Duda / Firebase 等異步會員權限系統打造)
+      var watcherStarted = false;
+      function startVisibilityWatchers() {
+        if (watcherStarted) return;
+        watcherStarted = true;
+
+        // 1. ResizeObserver：監聽舞台從 0 寬高變為實體尺寸的瞬間 (例如 Firebase 解鎖瞬間)
+        if (typeof ResizeObserver !== 'undefined' && stage) {
+          var ro = new ResizeObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) {
+              if (entries[i].contentRect.width > 0 && entries[i].contentRect.height > 0) {
+                initOrRefreshScrollTrigger();
+              }
+            }
+          });
+          ro.observe(stage);
+          ro.observe(root);
+        }
+
+        // 2. MutationObserver：監聽父層節點 style (display: none -> display: block) 或 class 變化
+        if (typeof MutationObserver !== 'undefined' && root) {
+          var mo = new MutationObserver(function () {
+            if (stage.offsetWidth > 0 && stage.offsetHeight > 0) {
+              initOrRefreshScrollTrigger();
+            }
+          });
+          var current = root;
+          while (current && current !== document.documentElement) {
+            mo.observe(current, { attributes: true, attributeFilter: ['style', 'class'] });
+            current = current.parentElement;
+          }
+        }
+
+        // 3. 多階延遲階梯檢查 (對齊 Firebase onAuthStateChanged 非同步回傳時間)
+        [100, 300, 600, 1000, 1800, 3000, 5000].forEach(function (t) {
+          setTimeout(function () {
+            if (stage.offsetWidth > 0 && stage.offsetHeight > 0) {
+              initOrRefreshScrollTrigger();
+            }
+          }, t);
+        });
+
+        // 4. 若處於 Duda 編輯器模式 (window.__isDudaEditor)，更新 VIP 標籤提示
+        if (window.__isDudaEditor) {
+          var vipBadge = root.querySelector('#ba-vip-badge');
+          if (vipBadge) {
+            vipBadge.textContent = '🛠️ 編輯器模式排版中 (VIP預覽)';
+            vipBadge.className = 'hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/30 text-amber-200 border border-amber-400/50 font-semibold tracking-wide';
+          }
+        }
+      }
+
+      // 首次嘗試初始化並掛載監聽
+      initOrRefreshScrollTrigger();
+      startVisibilityWatchers();
 
       // 初始化第 1 階段
       setPhase(0);
@@ -1125,17 +1212,11 @@
         var idx = curIdx;
         curIdx = -1;
         setPhase(idx >= 0 ? idx : 0);
-        if (typeof ScrollTrigger !== 'undefined') {
-          ScrollTrigger.sort();
-          ScrollTrigger.refresh();
-        }
+        initOrRefreshScrollTrigger();
       });
 
       window.addEventListener('load', function () {
-        if (typeof ScrollTrigger !== 'undefined') {
-          ScrollTrigger.sort();
-          ScrollTrigger.refresh();
-        }
+        initOrRefreshScrollTrigger();
       });
     }
 

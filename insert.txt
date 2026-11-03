@@ -720,35 +720,49 @@
       var phaseCards = root.querySelectorAll('[data-eo-card]');
       var hudButtons = root.querySelectorAll('[data-eo-hud]');
 
-      var pathLength = activeTrack.getTotalLength();
-      activeTrack.style.strokeDasharray = String(pathLength);
-      activeTrack.style.strokeDashoffset = String(pathLength);
-
+      var pathLength = 600;
       var nodeTargets = [
         { x: 200, y: 55 },
         { x: 160, y: 230 },
         { x: 240, y: 380 },
         { x: 200, y: 545 }
       ];
+      var nodeRatios = [0, 0.33, 0.66, 1];
 
-      var nodeRatios = nodeTargets.map(function (target) {
-        var bestLength = 0;
-        var minDistance = Infinity;
-        var steps = 400;
-        for (var i = 0; i <= steps; i++) {
-          var len = (i / steps) * pathLength;
-          var pt = activeTrack.getPointAtLength(len);
-          var dist = Math.hypot(pt.x - target.x, pt.y - target.y);
-          if (dist < minDistance) {
-            minDistance = dist;
-            bestLength = len;
+      function updatePathMeasurements() {
+        if (!activeTrack || typeof activeTrack.getTotalLength !== 'function') return false;
+        try {
+          var len = activeTrack.getTotalLength();
+          if (!len || isNaN(len) || len <= 20) return false;
+          pathLength = len;
+          activeTrack.style.strokeDasharray = String(pathLength);
+          activeTrack.style.strokeDashoffset = String(pathLength);
+
+          if (activeTrack.getPointAtLength) {
+            nodeRatios = nodeTargets.map(function (target) {
+              var bestLength = 0;
+              var minDistance = Infinity;
+              var steps = 400;
+              for (var i = 0; i <= steps; i++) {
+                var l = (i / steps) * pathLength;
+                var pt = activeTrack.getPointAtLength(l);
+                var dist = Math.hypot(pt.x - target.x, pt.y - target.y);
+                if (dist < minDistance) {
+                  minDistance = dist;
+                  bestLength = l;
+                }
+              }
+              return bestLength / pathLength;
+            });
+            nodeRatios[0] = 0;
+            nodeRatios[3] = 1;
           }
+          return true;
+        } catch (e) {
+          return false;
         }
-        return bestLength / pathLength;
-      });
-
-      nodeRatios[0] = 0;
-      nodeRatios[3] = 1;
+      }
+      updatePathMeasurements();
 
       var currentActiveIndex = -1;
 
@@ -879,27 +893,85 @@
         setActivePhase(closestIndex);
       }
 
-      // 使用 GSAP ScrollTrigger pin: true 釘選舞台，不受外部網站父層 overflow-x: hidden 限制，100% 停留在一個視窗大小
-      var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
-      var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
-      var mainScrollTrigger = ScrollTrigger.create({
-        trigger: pinnedStage,
-        pin: true,
-        pinSpacing: true,
-        start: 'top top+=' + headerOffset,
-        end: isMobileViewport ? '+=2200' : '+=3000',
-        scrub: 1.0,
-        onUpdate: function (self) {
-          updateStageOnScroll(self.progress);
-        }
-      });
+      // 使用 GSAP ScrollTrigger pin: true 釘選舞台：支援會員解鎖與零尺寸動態恢復
+      var mainScrollTrigger = null;
 
-      ScrollTrigger.sort();
-      ScrollTrigger.refresh();
-      setTimeout(function () {
-        ScrollTrigger.sort();
-        ScrollTrigger.refresh();
-      }, 150);
+      function initOrRefreshScrollTrigger() {
+        if (!pinnedStage) return false;
+        var rect = pinnedStage.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0 || pinnedStage.offsetWidth === 0) {
+          return false;
+        }
+
+        updatePathMeasurements();
+
+        if (typeof ScrollTrigger !== 'undefined') {
+          var headerOffset = parseFloat(getComputedStyle(root).getPropertyValue('--eo-header-offset')) || 0;
+          var isMobileViewport = window.matchMedia('(max-width: 1023px)').matches;
+
+          if (!mainScrollTrigger) {
+            mainScrollTrigger = ScrollTrigger.create({
+              trigger: pinnedStage,
+              pin: true,
+              pinSpacing: true,
+              start: 'top top+=' + headerOffset,
+              end: isMobileViewport ? '+=2200' : '+=3000',
+              scrub: 1.0,
+              onUpdate: function (self) {
+                updateStageOnScroll(self.progress);
+              }
+            });
+          }
+
+          ScrollTrigger.sort();
+          ScrollTrigger.refresh();
+        }
+
+        updateStageOnScroll(mainScrollTrigger ? mainScrollTrigger.progress : 0);
+        return true;
+      }
+
+      var watcherStarted = false;
+      function startVisibilityWatchers() {
+        if (watcherStarted) return;
+        watcherStarted = true;
+
+        if (typeof ResizeObserver !== 'undefined' && pinnedStage) {
+          var ro = new ResizeObserver(function (entries) {
+            for (var i = 0; i < entries.length; i++) {
+              if (entries[i].contentRect.width > 0 && entries[i].contentRect.height > 0) {
+                initOrRefreshScrollTrigger();
+              }
+            }
+          });
+          ro.observe(pinnedStage);
+          ro.observe(root);
+        }
+
+        if (typeof MutationObserver !== 'undefined' && root) {
+          var mo = new MutationObserver(function () {
+            if (pinnedStage.offsetWidth > 0 && pinnedStage.offsetHeight > 0) {
+              initOrRefreshScrollTrigger();
+            }
+          });
+          var cur = root;
+          while (cur && cur !== document.documentElement) {
+            mo.observe(cur, { attributes: true, attributeFilter: ['style', 'class'] });
+            cur = cur.parentElement;
+          }
+        }
+
+        [100, 300, 600, 1000, 1800, 3000, 5000].forEach(function (t) {
+          setTimeout(function () {
+            if (pinnedStage.offsetWidth > 0 && pinnedStage.offsetHeight > 0) {
+              initOrRefreshScrollTrigger();
+            }
+          }, t);
+        });
+      }
+
+      initOrRefreshScrollTrigger();
+      startVisibilityWatchers();
 
       setActivePhase(0);
       updateStageOnScroll(0);
