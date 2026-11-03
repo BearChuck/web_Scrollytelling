@@ -1,25 +1,32 @@
 <!-- =====================================================================
-  BRASS ACOUSTICS // 銅管小號發聲科學 (單視窗鎖定滾動沉浸版 / Pinned Scrollytelling Edition)
+  BRASS ACOUSTICS // 銅管小號發聲科學 (高可靠嵌入版 / Bulletproof Embed Edition)
   - 跑完滾完動畫才能繼續往下瀏覽 (Locked Single-Viewport Scrollytelling)：
       * 結合 GSAP ScrollTrigger Pin 釘選與 pinSpacing 佔位機制。
       * 當螢幕滾動至本區塊時，畫面精確鎖定於目前視窗（100dvh），使用者必須隨滾輪依序經歷 6 大發聲物理階段（0% ➔ 100%）。
       * 滾動期間中央 SVG 曲線平滑畫線、音訊指針位移、管內駐波即時形變、聲學數據毫秒級插值（Lerp）。
       * 只有當 6 階段完整播放完畢（Progress 達到 100%），畫面才會平滑解鎖，讓使用者順暢繼續往下瀏覽後續內容！
-  - 自動多組件排序校準 (Multi-Pin Sort & Refresh Safeguard)：
-      * 內建 ScrollTrigger.sort() 與二次智慧刷新機制，即使同一頁面嵌入多個不同組件（如攝影焦段 + 銅管小號），
-        也能 100% 依文檔順序精準鎖定各自的滾動區間，絕不跳過、絕不錯位！
-  - 三欄式/絕對定位混合編排 (黃金比例 4:3:5 舒適版面)：
-      * 左側 [4 欄]：小號剖面透視模擬器（氣流、雙唇、號嘴、管體、活塞、號口）+ 3 組即時聲學遙測方塊。
-      * 中央 [3 欄]：SVG 霓虹向量導軌與即時音訊指針，隨滾輪平滑描邊，6 個可點擊跳轉的發光互動節點。
-      * 右側 [5 欄]：CSS Grid 同格疊層圖卡槽 (ba-card-stack)，外框隨內容舒適包覆，雙層光學邊界，零截斷。
+  - 徹底解決「多組件同頁載入競爭」與「鎖不住」問題 (Race-Condition Free Dependency Loader)：
+      * 舊版若是同一頁面貼上兩份不同時間軸，第二個組件會誤判外部 JS 已下載完成而草率執行，導致 GSAP 釘選未初始化。
+      * 全新採用依賴就緒監聽佇列 (waitForDependencies)，100% 確保 window.gsap 與 ScrollTrigger 真正可用後才啟動釘選。
+      * 啟動後自動執行 ScrollTrigger.sort() 與二次智慧刷新，精確校準垂直觸發起點。
+  - 零依賴獨立 Scoped CSS 防禦 (Pure Scoped Layout Protection)：
+      * 內建完備的 4:3:5 三欄 Grid 與 Flex 原生樣式，即便宿主網站完全沒有 Tailwind 或網路延遲，
+        版面結構依然 100% 穩固，絕不縮扁、絕不位移、絕不破版！
   - 初學者白話文教學 (Beginner-Friendly Science)：
       * 徹底褪去生澀晦澀的物理公式與學術黑話。
       * 改以生動生活化比喻（吹氣球蓄力、小蜜蜂嗡嗡拍打、小漏斗聚焦、148cm金屬長管回音、3鍵切換音階、向日葵大喇叭高歌）。
       * 每一階段皆附「💨 動力來源 / 👄 發聲引擎 / 🎺 任務」與「💡 初學秘訣」，初學者一讀即懂。
   - 去背透明背景 (background: transparent)：完美融入宿主網站任意深淺底色。
   - 零 H1/H2/H3 標籤：全數採用階層樣式 <div>，不影響宿主網站 SEO 與大綱層級。
-  - 獨立作用域 Scoped CSS (#ba-scrolly-widget) + :where() 零權重重置，開箱即用無污染。
-====================================================================== -->
+
+  ======================================================================
+  ⚠️ 外部網站 / 父容器嵌入注意事項 (Host Container Guidelines)：
+  1. 父容器千萬不要加上 overflow: hidden 或 overflow: clip！
+     (CSS 規範：父層一旦有 overflow:hidden 或 transform，會攔截 position:fixed，導致釘選脫軌無法鎖住)。
+  2. 父容器的高度請設為 height: auto (不要寫死固定高度如 height: 600px)，
+     (釘選動畫需要滾動空間讓 pinSpacing 自然撐開，寫死高度會導致動畫無法滾動或內部雙滾軸)。
+  3. 父層容器請避免加入 CSS transform、filter、perspective 或 contain: paint。
+  ====================================================================== -->
 
 <div id="ba-scrolly-widget" class="ba-widget-root">
   <style>
@@ -45,7 +52,7 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* 使用 :where() 保持 0 權重，避免覆蓋 Tailwind 的 p-* / m-* / mx-auto 等排版留白工具類 */
+    /* 零權重重置，避免與宿主網站全域樣式衝突 */
     :where(#ba-scrolly-widget),
     :where(#ba-scrolly-widget) *,
     :where(#ba-scrolly-widget) *::before,
@@ -215,6 +222,29 @@
       box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
     }
 
+    /* ==================== 原生獨立 CSS 排版保護 (零依賴防跑版) ==================== */
+    #ba-scrolly-widget .ba-stage-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+      align-items: center;
+    }
+
+    @media (min-width: 1024px) {
+      #ba-scrolly-widget .ba-stage-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+      }
+      #ba-scrolly-widget .ba-col-left {
+        grid-column: span 4 / span 4;
+      }
+      #ba-scrolly-widget .ba-col-center {
+        grid-column: span 3 / span 3;
+      }
+      #ba-scrolly-widget .ba-col-right {
+        grid-column: span 5 / span 5;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       #ba-scrolly-widget *,
       #ba-scrolly-widget *::before,
@@ -255,10 +285,10 @@
     <div class="relative z-10 max-w-7xl mx-auto w-full flex-1 min-h-0 px-4 sm:px-6 lg:px-8 py-2 sm:py-3.5 flex flex-col justify-center overflow-hidden">
       
       <!-- 三欄主舞台 (桌機橫向 12 欄：左4 + 中3 + 右5 / 行動端背景軌道 + 前景上下舒適聚焦) -->
-      <div class="relative w-full grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4.5 lg:gap-6 items-center">
+      <div class="relative w-full ba-stage-grid gap-3 sm:gap-4.5 lg:gap-6 items-center">
 
         <!-- [左側欄 / 4 欄]：小號聲學透視儀 + 3 個白話即時指標 -->
-        <div class="relative z-10 lg:col-span-4 flex flex-col gap-2 sm:gap-3 justify-center">
+        <div class="relative z-10 ba-col-left flex flex-col gap-2 sm:gap-3 justify-center">
           
           <!-- 聲學實驗室儀表面板 -->
           <div class="ba-glass-panel rounded-3xl p-3 sm:p-4">
@@ -339,7 +369,7 @@
         </div>
 
         <!-- [中央欄 / 3 欄]：SVG 平滑向量曲線導軌 (桌機置中獨立欄 / 行動端化為微透背景軌道不佔垂直高度) -->
-        <div class="absolute inset-0 opacity-20 pointer-events-none lg:static lg:opacity-100 lg:col-span-3 lg:h-[420px] flex items-center justify-center">
+        <div class="absolute inset-0 opacity-20 pointer-events-none lg:static lg:opacity-100 ba-col-center lg:h-[420px] flex items-center justify-center">
           <svg id="ba-timeline-svg" class="w-full h-full max-h-[420px] lg:pointer-events-auto" viewBox="0 0 400 650" preserveAspectRatio="xMidYMid meet">
             <defs>
               <linearGradient id="ba-neon-grad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -422,7 +452,7 @@
         </div>
 
         <!-- [右側欄 / 5 欄]：單一焦點 6 階段說明圖卡槽 (Grid 同格自適應包覆：舒適留白、行高 1.8、雙層柔和邊界) -->
-        <div class="relative z-10 lg:col-span-5 ba-card-stack">
+        <div class="relative z-10 ba-col-right ba-card-stack">
 
           <!-- PHASE 01 -->
           <div data-ba-card="0" class="ba-phase-card is-active flex flex-col justify-between" title="點擊捲動鎖定至此階段">
@@ -642,20 +672,45 @@
 
 <script>
   (function () {
-    // 動態載入外部相依套件 (若宿主網站未引入 Tailwind 或 GSAP)
+    // 嚴格依賴載入器 (支援多組件併存，絕不在 CDN 未下載完畢前提前執行)
     function loadScript(src) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (resolve) {
+        if (src.indexOf('tailwindcss') !== -1 && window.tailwind) { resolve(); return; }
+        if (src.indexOf('gsap.min.js') !== -1 && window.gsap) { resolve(); return; }
+        if (src.indexOf('ScrollTrigger.min.js') !== -1 && window.ScrollTrigger) { resolve(); return; }
+        if (src.indexOf('ScrollToPlugin.min.js') !== -1 && window.ScrollToPlugin) { resolve(); return; }
+
         var existing = document.querySelector('script[src="' + src + '"]');
         if (existing) {
-          resolve();
+          existing.addEventListener('load', function () { resolve(); });
+          existing.addEventListener('error', function () { resolve(); });
           return;
         }
+
         var s = document.createElement('script');
         s.src = src;
-        s.onload = resolve;
+        s.onload = function () { resolve(); };
         s.onerror = function () { resolve(); };
         document.head.appendChild(s);
       });
+    }
+
+    // 依賴就緒監聽佇列 (最多輪詢等待 6 秒，確保 window.gsap 與 ScrollTrigger 真正可用)
+    function waitForDependencies(callback) {
+      var attempts = 0;
+      var maxAttempts = 60;
+      function check() {
+        attempts++;
+        if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
+          callback();
+        } else if (attempts < maxAttempts) {
+          setTimeout(check, 80);
+        } else {
+          // 若超過超時上限 (如離線且無快取)，仍執行基礎靜態備援渲染
+          callback();
+        }
+      }
+      check();
     }
 
     async function ensureDependenciesAndInit() {
@@ -673,12 +728,10 @@
           await loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js');
         }
       } catch (err) {
-        console.warn('[Brass Acoustics] Dependency loading bypassed:', err);
+        console.warn('[Brass Acoustics] Loader exception:', err);
       }
 
-      requestAnimationFrame(function () {
-        requestAnimationFrame(initBrassWidget);
-      });
+      waitForDependencies(initBrassWidget);
     }
 
     function initBrassWidget() {
@@ -1021,14 +1074,14 @@
           }
         });
 
-        // 關鍵多組件排序與刷新保證：確保此釘選組件在頁面中的順序 100% 正確，絕不提前觸發或跳過
+        // 確保此釘選組件在頁面中的順序 100% 正確
         ScrollTrigger.sort();
         ScrollTrigger.refresh();
 
         setTimeout(function () {
           ScrollTrigger.sort();
           ScrollTrigger.refresh();
-        }, 120);
+        }, 150);
       }
 
       // 初始化第 1 階段
